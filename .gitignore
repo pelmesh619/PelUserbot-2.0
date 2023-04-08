@@ -5,4 +5,3 @@
 /sessions
 __pycache__
 /config.json
-*.json
