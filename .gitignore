@@ -3,5 +3,4 @@
 /downloads
 /module_configs
 /sessions
-config.json
-__pycache__
+/config.json
