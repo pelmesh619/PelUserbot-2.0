@@ -1,0 +1,232 @@
+{
+    "ru": {
+        "core_module_name": "Ядро",
+        "description": "Ядро бота. Благодаря нему происходит взаимодействие с системой. Желательно не удалять",
+        "author_creator": "Создатель",
+        "changelog_v0.1.0-alpha": "Тестовая версия",
+
+        "author_form": {
+            "lambda x: x < 2": "Aвтор",
+            "lambda x: True": "Aвторы"
+        },
+        "handler_form": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "обработчик",
+            "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "обработчика",
+            "lambda x: True": "обработчиков"
+        },
+        "parameter_form": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "параметр",
+            "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "параметра",
+            "lambda x: True": "параметров"
+        },
+        "module_form": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "модуль",
+            "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "модуля",
+            "lambda x: True": "модулей"
+        },
+        "added_form": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "добавлен",
+            "lambda x: True": "добавлено"
+        },
+        "removed_form": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "удален",
+            "lambda x: True": "удалено"
+        },
+        "reloaded_form": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "перезагружен",
+            "lambda x: True": "перезагружено"
+        },
+        "time_month": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "месяц",
+            "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "месяца",
+            "lambda x: True": "месяцев"
+        },
+        "time_day": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "день",
+            "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "дня",
+            "lambda x: True": "дней"
+        },
+        "time_hour": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "час",
+            "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "часа",
+            "lambda x: True": "часов"
+        },
+        "time_minute": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "минута",
+            "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "минуты",
+            "lambda x: True": "минут"
+        },
+        "time_second": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "секунда",
+            "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "секунды",
+            "lambda x: True": "секунд"
+        },
+
+
+        "author_unknown": "неизвестен",
+        "version_unknown": "неизвестна",
+
+
+        "module_full_info_template": "Модуль {name}\n{author_form}: {authors}\nВерсия: {version}\n{description_template}{localization_template}\n{handlers_template}\n\n{requirements_template}{config_template}{changelog_template}",
+        "description_template": "Описание: \n    {description}\n",
+        "requirements_template": "Зависимости: {requirements}\n",
+        "localization_template": "Локализация: {languages}\n",
+        "handlers_template": "{handlers_count} {handlers_form}:\n    1. {first_handler} - {first_handler_type}: {first_handler_filter_string}<i>{first_handler_docs}</i>\n    {and_handlers_more}(<code>/commands {module_id}</code>)",
+        "and_handlers_more": "и еще {and_handlers_count_more} {and_handler_more_form} ",
+
+        "handlers_there_are_no_handlers": "Обработчиков нет",
+        "config_template": "Настройки модуля: {configs_count} {parameter_form} (<code>/config {module_id}</code>)\n",
+        "changelog_template": "Список изменений ({current_version}) (<code>/changelog {module_id}</code>): \n    {changelog_current_version} ",
+        "changelog_there_is_no_changelog_of_this_version": "Списка изменения версии {current_version} не найдено, но доступен список изменений других версий. (<code>/changelog {module_id}</code>)",
+        "changelog_version_is_not_set": "Версия модуля не установлена, но доступен список изменений других версий. (<code>/changelog {module_id}</code>)",
+        "module_enter_module_name": "Введите идентификатор модуля после команды, чтобы посмотреть информацию о нем. Например: <code>/module test</code>",
+        "module_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>",
+
+        "error_raised_while_handler_was_proceed":
+            "Во время выполнения обработчика в функции <code>{func}</code> возникла неожиданная ошибка: \n\n<code>{error}</code>\n\nПроверьте консоль для полной информации",
+        "error_raised_while_handler_was_proceed_in_module":
+            "Во время выполнения обработчика в модуле {module_name} в функции <code>{func}</code> возникла неожиданная ошибка: \n\n<code>{error}</code>\n\nПроверьте консоль для полной информации",
+
+        "command_info_template": "Обработчик №{num} <code>{func_name}</code> модуля {module_name}\n\n{handler_type}: {filter_string}\n{docs_template}",
+        "command_docs_template": "Описание: \n    {docs}",
+        "command_module_not_found": "Модуль {module_id} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>",
+        "command_module_not_found_and_enter_command":
+            "Модуль {module_id} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>\nТакже введите после модуля обработчик или его номер, чтобы посмотреть информацию о нем",
+        "command_enter_module_name": "Введите модуль и имя обработчика или его номер после команды, чтобы посмотреть информацию об обработчике. \nНапример: <code>/command test 1</code>, <code>/command test test_handler</code>",
+        "command_command_not_found_by_index": "Модуль {module_name} имеет {count_of_handlers} {handler_form}. Используйте команду <code>/commands {module_id}</code>, чтобы посмотреть обработчики модуля",
+        "command_command_not_found_by_command":
+            "Модуль {module_name} не имеет обработчика {command_name}. Используйте команду <code>/commands {module_id}</code>, чтобы посмотреть обработчики модуля",
+        "command_enter_command": "Введите имя обработчика или его номер, чтобы посмотреть информацию о нем. Например: <code>/command test 1</code>, <code>/command test test_handler</code>",
+
+        "commands_enter_module_name": "Введите идентификатор модуля после команды, чтобы посмотреть информацию о нем. Например: <code>/module test</code>",
+        "commands_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>",
+        "commands_module_does_not_have_commands": "Модуль {module_name} не имеет обработчиков",
+        "commands_template": "Обработчики модуля {module_name}:\n\n{commands}Всего {handlers_count} {handlers_form}",
+        "short_command_template": "{num}. <code>{handler}</code> - {handler_type}: {filter_string}{docs} (<code>/command {module_id} {handler}</code>)",
+
+        "install_enter_module_name": "Введите имя модуля после команды, чтобы установить его. ",
+        "install_module_was_installed": "Модуль {module_name} успешно установлен: {added_form} {handlers_count} {handler_form}",
+
+        "uninstall_enter_module_name": "Введите имя модуля после команды, чтобы удалить его. ",
+        "uninstall_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>",
+        "uninstall_module_was_uninstalled": "Модуль {module_name} успешно удален: {removed_form} {handlers_count} {handler_form}",
+
+        "reload_module_was_uninstalled": "Модуль {module_name} был удален",
+        "reload_module_was_reloaded": "Модуль {module_name} был перезагружен: {added_handlers}{reloaded_handlers}{removed_handlers}",
+        "reload_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>",
+        "reload_enter_module_name": "Введите имя модуля после команды, чтобы перезагрузить его. ",
+        "added_handlers_template": "\n*  {added_form} {added_handlers_count} {added_handler_form}",
+        "reloaded_handlers_template": "\n*  {reloaded_form} {reloaded_handlers_count} {reloaded_handler_form}",
+        "removed_handlers_template": "\n*  {removed_form} {removed_handlers_count} {removed_handler_form}",
+
+        "restart_confirm": "Вы уверены, что хотите совершите перезагрузку бота? Все обработчики удалятся и установятся заново\n\nОтветьте y - если да, n - если нет",
+        "restarting": "Перезагрузка...",
+        "restart_succeed": "Перезагрузка выполнена успешно",
+
+        "modules_template": "Список модулей:\n\n{modules}\nВсего {modules_count} {module_form}",
+        "module_short_info": "* {module_name}, {handlers_count} {handler_form}{description} (<code>/module {module_id}</code>)\n",
+
+        "config_enter_module_name": "Введите имя модуля после команды, чтобы посмотреть его настройки. ",
+        "config_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>",
+        "config_config_template": "Настройки модуля {module_name}:\n\n{parameters}",
+        "config_parameter_template": "{num}. {name} - {value} {default_value}\n",
+        "config_default_template": "({value} по умолчанию)",
+
+
+        "TODO smth with this": "TODO",
+        "help_message": "[Помощь по Peluserbot]\n\nКоманды: \n<code>/modules</code> - список установленных модулей\n<code>/module [модуль]</code> - показать информацию о модуле",
+
+        "stats_template": "Статистика бота:\n\nБот работает: {starting_time}\nПрошло времени с прошлой перезагрузки: {last_restart_time}\nВсего обработчиков: {handlers}\nОбработчиков запущено: {handlers_activated}\nОбновлений обработано: {handlers_handled}\nОбновлений обработано с ошибкой: {handlers_crushed}\nВызовов функции выдачи строки: {get_string_calls}",
+
+
+        "handler_template": "* <code>{name}</code>, приоритет - {group}",
+        "handler_template_in_module": "* <code>{name}</code> модуля {module_name}, приоритет - {group}",
+        "handlers_list_empty": "Список установленных обработчиков пуст",
+        "handlers_list": "Список обработчиков. Всего установлено {count_handlers} {form_handler}:",
+        "handlers_page_out_of": "Страница {page} из {amount_pages}",
+        "handlers_page_all_switches": "Ответьте <code><</code>, чтобы пролистнуть назад, <code>></code> - вперед",
+        "handlers_page_forward_switch": "Ответьте <code>></code>, чтобы пролистнуть вперед",
+        "handlers_page_backward_switch": "Ответьте <code><</code>, чтобы пролистнуть назад",
+
+        "wait_answer_filter_description": "Фильтрует сообщения, который являются ответом на сообщение, которое ждет ответа",
+
+        "filter_and": "И",
+        "filter_or": "ИЛИ",
+        "filter_not": "НЕ",
+
+        "filter_all": "любые",
+        "filter_animation": "с анимацией (гифкой)",
+        "filter_audio": "с аудио",
+        "filter_bot": "от бота",
+        "filter_caption": "с подписью",
+        "filter_channel": "каналов",
+        "filter_channel_chat_created": "объявляющие создание канала",
+        "filter_contact": "с контактом",
+        "filter_delete_chat_photo": "объявляющие удаление фото чата",
+        "filter_dice": "с кубиком",
+        "filter_document": "с файлом",
+        "filter_forwarded": "пересланные",
+        "filter_from_chat": "из чата",
+        "filter_from_chats": "из чатов",
+        "filter_from_command": "на команду",
+        "filter_from_commands": "на команды",
+        "filter_from_scheduled": "отправленные отложенные",
+        "filter_from_user": "от пользователя",
+        "filter_from_users": "от пользователей",
+        "filter_game": "с игрой",
+        "filter_game_high_score": "объявляющие рекорд в игре",
+        "filter_group": "чатов",
+        "filter_group_chat_created": "объявляющие создание чата",
+        "filter_incoming": "входящие",
+        "filter_inline_keyboard": "с инлайн-клавиатурой",
+        "filter_left_chat_member": "объявляющие выход участников из чата",
+        "filter_linked_channel": "отправленные каналом для комментирования",
+        "filter_location": "с местоположением",
+        "filter_me": "от меня",
+        "filter_media": "с любым медиа",
+        "filter_media_group": "c несколькими медиа",
+        "filter_media_spoiler": "с медиа-спойлером",
+        "filter_mentioned": "с упоминанием типа @telegram",
+        "filter_migrate_from_chat_id": "объявляющие миграцию из чата",
+        "filter_migrate_to_chat_id": "объявляющие миграцию в чат",
+        "filter_new_chat_members": "объявляющие присоединение участников к чату",
+        "filter_new_chat_photo": "объявляющие смену фотографии чата",
+        "filter_new_chat_title": "объявляющие смену названия чата",
+        "filter_outgoing": "исходящие",
+        "filter_photo": "с фото",
+        "filter_pinned_message": "объявляющие закрепление сообщения",
+        "filter_poll": "с опросом",
+        "filter_private": "в личных чатах",
+        "filter_regex": "совпадающие регулярному выражению",
+        "filter_regex_flags": "флаги:",
+        "filter_reply": "с отвеченным сообщением",
+        "filter_reply_keyboard": "с клавиатурой",
+        "filter_scheduled": "отложенные",
+        "filter_service": "служебные",
+        "filter_sticker": "со стикером",
+        "filter_supergroup_chat_created": "объявляющие создание супергруппы",
+        "filter_text": "текстовые",
+        "filter_venue": "с локацией",
+        "filter_via_bot": "отправленные через инлайн-бота",
+        "filter_video": "с видео",
+        "filter_video_chat_ended": "объявляющие окончание видеочата",
+        "filter_video_chat_members_invited": "приглашающие пользователей в видеочат",
+        "filter_video_chat_started": "объявляющие начало видеочата",
+        "filter_video_note": "с видеосообщением",
+        "filter_voice": "с голосовым сообщением",
+        "filter_web_page": "с предпросмотром сайта",
+
+        "handler_MessageHandler": "обрабатывает сообщения",
+        "handler_EditedMessageHandler": "обрабатывает измененные сообщения",
+
+        "ru_language": "русский язык\uD83C\uDDF7\uD83C\uDDFA",
+        "en_language": "английский язык\uD83C\uDDEC\uD83C\uDDE7",
+        "ge_language": "немецкий язык\uD83C\uDDE9\uD83C\uDDEA"
+    },
+    "en": {
+        "ru_language": "russian\uD83C\uDDF7\uD83C\uDDFA",
+        "en_language": "english\uD83C\uDDEC\uD83C\uDDE7",
+        "ge_language": "german\uD83C\uDDE9\uD83C\uDDEA"
+
+    }
+}
