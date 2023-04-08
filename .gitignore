@@ -4,5 +4,5 @@
 /module_configs
 /sessions
 __pycache__
-config.json
+/config.json
 *.json
