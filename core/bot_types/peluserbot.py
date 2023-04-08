@@ -190,7 +190,7 @@ class Peluserbot(Client):
     ):
         Dispatcher.handler_worker = Peldispatcher.handler_worker
         if config_filename is not None:
-            config_data = json.load(open(config_filename, encoding='utf8'))
+            config_data = json.loads(open(config_filename, encoding='utf8').read().encode().decode('utf-8-sig'))
             self._config = config_data
             self._config_filename = config_filename
 
@@ -240,7 +240,6 @@ class Peluserbot(Client):
         self.handlers_crushed = 0
         self.starting_time = time.time()
         self.last_restart_time = self.starting_time
-
 
         super().__init__(
             name=name,
@@ -341,9 +340,13 @@ class Peluserbot(Client):
 
     def get_config_parameter(self, param, default=None):
         try:
-            self._config = json.load(open(self._config_filename, 'r', encoding='utf8'))
+            self._config = json.loads(
+                open(
+                    self._config_filename, 'r', encoding='utf8'
+                ).read().encode().decode('utf-8-sig')
+            )
         except Exception as e:
-            pass
+            log.error('App\'s config file was not reloaded, error was raised', exc_info=e)
         self.is_config_existing()
         if param in self._config:
             return self._config[param]
@@ -423,7 +426,6 @@ class Peluserbot(Client):
         await self.storage.save()
         await self.dispatcher.stop()
         self.modules = []
-
 
         for media_session in self.media_sessions.values():
             await media_session.stop()

@@ -7,6 +7,7 @@
     "__comment2__": "It is better to use your own api_id and api_hash got from my.telegram.org",
 
 
+    "device_model": "PelUserbot",
     "app_version": "v2.0.0-alpha1",
     "plugins": {
         "root": "modules",

@@ -36,6 +36,8 @@ module = Module(
             'waiting_input': 'Ожидание ввода...',
             'program_needs_input': 'Программе нужен ввод (ответьте на это сообщение)\n\n<code>{prompt}</code>',
             'code_edited_filter': 'с измененным кодом внутри старого сообщения',
+            'define_right_message_docs': 'являющиеся ответом на сообщение, ждущее ввод',
+            # TODO docs for handlers
         },
         'en': {
             'code': '<b>Code</b>:\n<pre>{code}</pre>',
@@ -343,7 +345,8 @@ def define_right_message(_, __, msg):
     return False
 
 
-@Client.on_message(filters.text & filters.reply & filters.create(func=define_right_message))
+@Client.on_message(filters.text & filters.reply &
+                   filters.create(func=define_right_message, __doc__='string_id=define_right_message_docs'))
 async def getting_input(_, message):
     reply_msg = message.reply_to_message
     chat = getattr(reply_msg.chat, 'id', reply_msg.from_user.id)
@@ -370,16 +373,4 @@ def reformat_exception_frames(exception_frames, code):
     return exception_frames
 
 
-async def main():
-    code = 'import utils\ndef f(i):\n    return utils.time_to_string("g", "h")\nfor i in range(10):\n    ' \
-           'for j in range(i, 10):\n        print(f(i))\nreturn True'
 
-    result = await asyncexec(code)
-
-    exception_frames = reformat_exception_frames(result.error_console.file, code)
-
-    print(exception_frames)
-
-
-if __name__ == '__main__':
-    asyncio.run(main())

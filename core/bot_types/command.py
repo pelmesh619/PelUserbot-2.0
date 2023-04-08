@@ -66,13 +66,13 @@ class Command(BotObject):
 
         filter_string = text_utils.format_text(
             self.filter_string,
-            **{flt.group(1): self.module.app.get_string(flt.group(1), _module_id='core.handlers')
+            **{flt.group(1): self.module.app.get_core_string(flt.group(1))
                for flt in to_replace},
         )
-        for match in re.finditer(r'{__doc__=(.+?)}', filter_string, re.S):
-            doc = match.group(1)
-            filter_string = re.sub('{__doc__=(.+?)}', self.module.decode_string(doc), filter_string)
 
+        for match in re.finditer(r'\{__doc__=(.+?)}', filter_string, re.DOTALL):
+            doc = match.group(1)
+            filter_string = re.sub(fr'{{__doc__={doc}}}', self.module.decode_string(doc), filter_string, re.DOTALL)
         return filter_string
 
 

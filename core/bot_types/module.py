@@ -187,95 +187,82 @@ class Module(BotObject):
 
         all_strings_count = len(all_strings)
 
-        return self.app.get_string(
+        return self.app.get_core_string(
             'module_full_info_template',
             name=self.full_name(),
-            author_form=self.app.get_string_form('author_form', len(authors), _module_id='core.handlers'),
+            author_form=self.app.get_core_string_form('author_form', len(authors)),
             authors=', '.join(authors_strings) if self.authors
-            else self.app.get_string('author_unknown', _module_id='core.handlers'),
+            else self.app.get_core_string('author_unknown'),
             version=self.decode_string(self.version) or
-                    self.app.get_string('version_unknown', _module_id='core.handlers'),
-            description_template=self.app.get_string(
+                    self.app.get_core_string('version_unknown'),
+            description_template=self.app.get_core_string(
                 'description_template',
                 description=self.decode_string(self.description),
-                _module_id='core.handlers'
             ) if self.description else '',
-            localization_template=self.app.get_string(
+            localization_template=self.app.get_core_string(
                 'localization_template',
                 languages=', '.join(
-                    [self.app.get_string(lang + '_language', default=lang, _module_id='core.handlers') +
+                    [self.app.get_core_string(lang + '_language', default=lang) +
                      ' (' + str(round(strings_count * 100 / all_strings_count, 2)) + '%)'
                      for lang, strings_count in localization.items()]
                 ),
-                _module_id='core.handlers'
             ) if all_strings_count > 0 else '',
-            handlers_template=self.app.get_string(
+            handlers_template=self.app.get_core_string(
                 'handlers_template',
                 handlers_count=len(self.commands),
-                handlers_form=self.app.get_string_form('handler_form', len(self.commands), _module_id='core.handlers'),
+                handlers_form=self.app.get_core_string_form('handler_form', len(self.commands)),
                 module_id=self.module_id,
                 first_handler='<code>' + self.commands[0].func.__name__ + '</code>',
                 first_handler_filter_string=self.commands[0].repr_filter_with_get_string(),
-                first_handler_type=self.app.get_string(
+                first_handler_type=self.app.get_core_string(
                     'handler_' + self.commands[0].handler_type,
-                    _module_id='core.handlers'
                 ),
                 first_handler_docs=':\n          ' + text_utils.cut_text(
                     self.decode_string(self.commands[0].documentation).strip('\n')
                 )
                 if self.commands[0].documentation else '',
-                and_handlers_more=self.app.get_string(
+                and_handlers_more=self.app.get_core_string(
                     'and_handlers_more',
-                    and_handlers_count_more=len(self.handlers) - 1,
-                    and_handler_more_form=self.app.get_string_form('handler_form', len(self.handlers) - 1,
-                                                                   _module_id='core.handlers'),
-                    _module_id='core.handlers'
+                    and_handlers_count_more=len(self.commands) - 1,
+                    and_handler_more_form=self.app.get_core_string_form('handler_form', len(self.commands) - 1),
                 ) if len(self.commands) > 1 else '',
-                _module_id='core.handlers'
-            ) if self.handlers else self.app.get_string('handlers_there_are_no_handlers', _module_id='core.handlers'),
-            requirements_template=self.app.get_string(
+            ) if self.handlers else self.app.get_core_string('handlers_there_are_no_handlers'),
+            requirements_template=self.app.get_core_string(
                 'requirements_template',
                 requirements=', '.join(self.requirements),
-                _module_id='core.handlers'
             ) if self.requirements else '',
-            config_template=self.app.get_string(
+            config_template=self.app.get_core_string(
                 'config_template',
                 configs_count=len(self.config),
-                parameter_form=self.app.get_string_form('parameter_form', len(self.config), _module_id='core.handlers'),
+                parameter_form=self.app.get_core_string_form('parameter_form', len(self.config)),
                 module_id=self.module_id,
-                _module_id='core.handlers'
             ) if self.config else '',
-            changelog_template=self.app.get_string(
+            changelog_template=self.app.get_core_string(
                 'changelog_template',
                 current_version=self.decode_string(self.version),
                 changelog_current_version=self.decode_string(self.changelog.get(self.version)),
                 module_id=self.module_id,
-                _module_id='core.handlers'
             ) if self.version and self.changelog.get(self.version)
-            else self.app.get_string(
+            else self.app.get_core_string(
                 'changelog_there_is_no_changelog_of_this_version',
                 current_version=self.decode_string(self.version),
                 module_id=self.module_id,
-                _module_id='core.handlers'
             ) if self.version and not self.changelog.get(self.version) and self.changelog
-            else self.app.get_string(
+            else self.app.get_core_string(
                 'changelog_version_is_not_set',
                 module_id=self.module_id,
-                _module_id='core.handlers'
             ) if not self.version and self.changelog else '',
-            _module_id='core.handlers'
         )
 
     def get_short_info(self):
-        return self.app.get_string(
+        return self.app.get_core_string(
             'module_short_info',
             module_name=self.full_name(),
             handlers_count=len(self.commands),
-            handler_form=self.app.get_string_form('handler_form', len(self.commands), _module_id='core.handlers'),
+            handler_form=self.app.get_core_string_form('handler_form', len(self.commands)),
             description=':\n    ' + text_utils.cut_text(
                 self.decode_string(self.description)) if self.description else '',
             module_id=self.module_id,
-            _module_id='core.handlers'
         )
 
     def command(

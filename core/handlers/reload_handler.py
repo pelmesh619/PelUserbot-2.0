@@ -33,10 +33,9 @@ async def reload_handler(app, message):
     message = await message.reply_text(uninstall_respond)
 
     app.reload_module(module_path)
-    print(module_path)
     module = app.install_module(module_path, module_id=module_name)
     new_handlers = sum([[j[0].callback.__name__ for j in i.handlers] for i in module.handlers], start=[])
-    print(new_handlers)
+
 
     removed_handlers = 0
     reloaded_handlers = 0

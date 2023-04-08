@@ -39,9 +39,6 @@ module = Module(
         },
     },
     strings_source_filename=None,
-    config={
-        'code': '1498292093',
-    },
     requirements=[],
     changelog={
         "v1.0.0": "string_id=changelog_v1.0.0",

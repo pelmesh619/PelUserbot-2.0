@@ -1,5 +1,5 @@
-import html
 import re
+import html
 import logging
 import hashlib
 import inspect
@@ -20,6 +20,7 @@ module = Module(
     strings={
         'ru': {
             'module_name': 'Алиасы',
+            'description': 'Управляет алиасами - сокращениями команд и прочего. /aliases - посмотреть все алиасы',
 
             'True': 'да',
             'False': 'нет',
@@ -50,6 +51,8 @@ module = Module(
                                  '<code>/alias <заменяемый текст> <заменяющий текст></code> - создать алиас',
             'aliasdel_wrong_input': 'Введите команду <code>/aliasdel <алиас></code>, чтобы удалить алиас\n'
                                     '<code>/aliases</code> - посмотреть алиасы',
+            'alias_filter_docs': 'совпадающие алиасам',
+            # TODO docs for handlers
         },
         'en': {
         },
@@ -228,6 +231,11 @@ async def show_aliases_handler(_, message):
 
 
 def alias_work_filter(_, __, message):
+    """string_id=alias_filter_docs
+
+    Filter messages that match existing aliases
+    """
+
     aliases = module.database.execute_and_fetch('SELECT * FROM aliases;')
 
     for alias_row in aliases:
@@ -239,7 +247,8 @@ def alias_work_filter(_, __, message):
             return True
 
 
-@Client.on_message(filters.me & (filters.text | filters.caption) & filters.create(alias_work_filter))
+@Client.on_message(filters.me & (filters.text | filters.caption) &
+                   filters.create(alias_work_filter, __doc__=alias_work_filter.__doc__))
 async def alias_handler_worker(app, message):
     await message.edit(message.text)
 
