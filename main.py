@@ -1,4 +1,3 @@
-from pyrogram import filters, idle
 from core import Peluserbot
 
 __version__ = '2.0.0-alpha1'
