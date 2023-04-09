@@ -3,6 +3,7 @@ import logging
 import importlib
 import json
 import time
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime
 from pathlib import Path
 from typing import Union, Optional, List
@@ -233,6 +234,8 @@ class Peluserbot(Client):
 
         self.modules = []
         self.answers = {}
+        self.scheduler = AsyncIOScheduler()
+        self.scheduler.start()
 
         self.get_string_calls = 0
         self.handlers_activated = 0

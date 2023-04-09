@@ -1,4 +1,6 @@
 import asyncio
+import time
+
 import pyrogram
 
 from pyrogram import Client, filters
@@ -18,7 +20,7 @@ async def restart_handler(app, message):
         await app.restart(block=False)
         await answer.edit_text(app.get_core_string('restart_succeed'))
         await message.edit_text(message.text.html + '\n\n' + app.get_core_string('restart_succeed'))
-
+        app.last_restart_time = time.time()
         # await asyncio.sleep(5)
         # await answer.delete()
         # raise pyrogram.StopPropagation()

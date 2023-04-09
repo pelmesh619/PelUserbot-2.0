@@ -4,5 +4,6 @@
 /module_configs
 /sessions
 __pycache__
-*.json
+
+config2.json
 main_test.py
