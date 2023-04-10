@@ -15,7 +15,7 @@ async def restart_handler(app, message):
     answer = await bot_utils.wait_answer(message, filters.me & filters.regex(r'^y|n$'), timeout=120)
     if answer is None:
         await message.edit_text(message.text.html + '\n\n' + app.get_core_string('message_is_outdated'))
-    if answer.text == 'y':
+    elif answer.text == 'y':
         await answer.edit_text(app.get_core_string('restarting'))
         await app.restart(block=False)
         await answer.edit_text(app.get_core_string('restart_succeed'))

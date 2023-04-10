@@ -122,6 +122,7 @@
         "restart_confirm": "Вы уверены, что хотите совершите перезагрузку бота? Все обработчики удалятся и установятся заново\n\nОтветьте y - если да, n - если нет",
         "restarting": "Перезагрузка...",
         "restart_succeed": "Перезагрузка выполнена успешно",
+        "message_is_outdated": "Сообщение устарело",
 
         "modules_template": "Список модулей:\n\n{modules}\nВсего {modules_count} {module_form}",
         "module_short_info": "* {module_name}, {handlers_count} {handler_form}{description} (<code>/module {module_id}</code>)\n",
