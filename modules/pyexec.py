@@ -259,7 +259,7 @@ async def execute_handler(peluserbot, message):
 
     if not script:
         if not message.reply_to_message:
-            await message.edit_text(module.get_string('no_args'))
+            await message.reply(module.get_string('no_args'))
             return
 
         exec_msg = message.reply_to_message
@@ -274,7 +274,7 @@ async def execute_handler(peluserbot, message):
 
     respond = module.get_string('code', code=html.escape(script))
 
-    await message.edit_text(respond, parse_mode=pyrogram.enums.ParseMode.HTML)
+    bot_message = await message.reply(respond, parse_mode=pyrogram.enums.ParseMode.HTML)
 
     reply = (await peluserbot.get_messages(exec_msg.chat.id, exec_msg.id, replies=2)).reply_to_message
 
@@ -320,15 +320,15 @@ async def execute_handler(peluserbot, message):
     if len(respond) >= 4096:
         text = utils.split_string(respond)
 
-        await message.edit_text(text=text[0] + '</code>', parse_mode=pyrogram.enums.ParseMode.HTML)
+        await bot_message.edit_text(text=text[0] + '</code>', parse_mode=pyrogram.enums.ParseMode.HTML)
 
-        reply_to = message
+        reply_to = bot_message
         for i in range(1, len(text)):
             reply_to = await reply_to.reply_text(text='<code>' + text[i] + '</code>',
                                                  parse_mode=pyrogram.enums.ParseMode.HTML)
 
     else:
-        await message.edit_text(respond, parse_mode=pyrogram.enums.ParseMode.HTML)
+        await bot_message.edit_text(respond, parse_mode=pyrogram.enums.ParseMode.HTML)
 
 
 def define_right_message(_, __, msg):

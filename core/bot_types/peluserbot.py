@@ -555,6 +555,8 @@ class Peluserbot(Client):
                         self.name, func.__name__, module_id))
                 not_removed_handlers[func.__name__] = e
 
+        if getattr(module.database, 'connection', False):
+            module.database.connection.close()
         self.remove_module(module)
         return {
             'uninstalled': removed_handlers,

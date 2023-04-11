@@ -77,4 +77,4 @@ async def reload_handler(app, message):
         _module_id='core.handlers'
     )
 
-    await message.edit_text(respond)
+    await message.edit(respond)

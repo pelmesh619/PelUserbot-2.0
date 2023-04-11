@@ -33,7 +33,7 @@ class ModuleDatabase(BotObject):
     def execute(self, sql):
         cur = self.connection.cursor()
         try:
-            cur.execute(sql)
+            cur.executescript(sql)
             self.connection.commit()
         except Exception as e:
             logging.error(f'Error while executing `{sql}` in database of module `{self.module_id}`', exc_info=e)

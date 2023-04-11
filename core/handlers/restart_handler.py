@@ -10,7 +10,7 @@ from utils import bot_utils
 
 @Client.on_message(filters.me & filters.command('restart'))
 async def restart_handler(app, message):
-    message = await message.edit_text(app.get_core_string('restart_confirm'))
+    message = await message.reply(app.get_core_string('restart_confirm'))
 
     answer = await bot_utils.wait_answer(message, filters.me & filters.regex(r'^y|n$'), timeout=120)
     if answer is None:

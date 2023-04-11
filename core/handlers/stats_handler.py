@@ -9,8 +9,8 @@ from utils import time_utils
 async def stats_handler(app, message):
     respond = app.get_core_string(
         'stats_template',
-        starting_time=time_utils.time_to_string(time.time() - app.starting_time, message),
-        last_restart_time=time_utils.time_to_string(time.time() - app.last_restart_time, message),
+        starting_time=message.get_string.time_to_string(time.time() - app.starting_time),
+        last_restart_time=message.get_string.time_to_string(time.time() - app.last_restart_time),
         handlers=len(sum(app.dispatcher.groups.values(), [])),
         handlers_activated=app.handlers_activated,
         handlers_handled=app.handlers_handled,

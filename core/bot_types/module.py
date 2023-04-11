@@ -121,7 +121,7 @@ class Module(BotObject):
         return self.config
 
     def get_config_parameter(self, key, default=None):
-        return self.config.get(key, default)
+        return self.get_config().get(key, default)
 
     def set_config_parameter(self, key, value):
         self.config[key] = value
@@ -297,9 +297,9 @@ class Module(BotObject):
 
 def wrapper(func, lang_code, app=None):
     def f(*args, **kwargs):
-        if 'lang_code' not in kwargs or kwargs['lang_code'] is None:
+        if 'lang_code' not in kwargs or kwargs.get('lang_code', None) is None:
             kwargs['lang_code'] = lang_code
-        if app and 'app' not in kwargs or kwargs['app'] is None:
+        if app is not None and 'app' not in kwargs or kwargs.get('app', None) is None:
             kwargs['app'] = app
 
         return func(*args, **kwargs)
