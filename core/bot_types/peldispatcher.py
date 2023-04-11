@@ -57,6 +57,7 @@ class Peldispatcher(Dispatcher):
                                 module = self.client.get_module_by_handler(handler, group_number)
                                 if module:
                                     parsed_update.get_string = module.get_strings_by_lang_code(lang_code)
+                                    parsed_update.get_string_form = parsed_update.get_string.get_string_form
 
                             try:
                                 self.client.handlers_activated += 1

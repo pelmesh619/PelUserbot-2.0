@@ -61,6 +61,31 @@
             "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "секунды",
             "lambda x: True": "секунд"
         },
+        "date_template": "{hours}:{minutes}:{seconds} (UTC{timezone}), {day}{suffix} {month}, {day_week}, {year} год",
+        "short_date_template": "{hours}:{minutes}:{seconds} (UTC{timezone}) {day}.{month}.{year}",
+        "date_day_suffixes": {
+            "lambda x: x % 10 == 3 and not (x % 100 == 13)": "-ье",
+            "lambda x: True": "-ое"
+        },
+        "date_weekday_1": "понедельник",
+        "date_weekday_2": "вторник",
+        "date_weekday_3": "среда",
+        "date_weekday_4": "четверг",
+        "date_weekday_5": "пятница",
+        "date_weekday_6": "суббота",
+        "date_weekday_7": "воскресенье",
+        "date_month_1": "января",
+        "date_month_2": "февраля",
+        "date_month_3": "марта",
+        "date_month_4": "апреля",
+        "date_month_5": "мая",
+        "date_month_6": "июня",
+        "date_month_7": "июля",
+        "date_month_8": "августа",
+        "date_month_9": "сентября",
+        "date_month_10": "октября",
+        "date_month_11": "ноября",
+        "date_month_12": "декабря",
 
 
         "author_unknown": "неизвестен",

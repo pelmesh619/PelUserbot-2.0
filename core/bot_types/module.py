@@ -16,7 +16,7 @@ from .module_strings import ModuleStrings
 from .module_database import ModuleDatabase
 from .command import Command
 
-from utils import text_utils
+from utils import text_utils, time_utils
 
 log = logging.Logger(__name__)
 
@@ -283,17 +283,24 @@ class Module(BotObject):
             'ModuleStrings{}'.format(lang_code.upper()),
             (ModuleStrings, ),
             {
+                'lang_code': lang_code,
                 '__call__': wrapper(self.strings.get_string, lang_code),
                 'get_string': wrapper(self.strings.get_string, lang_code),
-                'get_string_form': wrapper(self.strings.get_string_form, lang_code)
+                'get_string_form': wrapper(self.strings.get_string_form, lang_code),
+                'get_core_string': wrapper(self.app.get_core_string, lang_code),
+                'get_core_string_form': wrapper(self.app.get_core_string_form, lang_code),
+                'time_to_string': wrapper(time_utils.time_to_string, lang_code, self.app),
+                'date_to_string': wrapper(time_utils.date_to_string, lang_code, self.app),
             }
         )()
 
 
-def wrapper(func, lang_code):
+def wrapper(func, lang_code, app=None):
     def f(*args, **kwargs):
         if 'lang_code' not in kwargs or kwargs['lang_code'] is None:
             kwargs['lang_code'] = lang_code
+        if app and 'app' not in kwargs or kwargs['app'] is None:
+            kwargs['app'] = app
 
         return func(*args, **kwargs)
 
