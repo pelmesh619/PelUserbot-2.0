@@ -21,7 +21,7 @@ class ModuleDatabase(BotObject):
         self.module_id = module.module_id
         try:
             self.connection = sqlite3.connect(
-                os.path.join(module.app.get_config_parameter('database_directory'), f'{self.module_id}.db'),
+                os.path.join(module.app.get_config_parameter('database_directory'), f'{self.module_id}.sqlite3'),
                 check_same_thread=False
             )
         except Exception as e:
