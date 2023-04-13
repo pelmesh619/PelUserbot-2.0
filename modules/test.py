@@ -37,6 +37,7 @@ module = Module(
         },
     },
     strings_source_filename=None,
+    update_source_link='https://raw.githubusercontent.com/pelmesh619/Peluserbot-2.0-Modules/main/test.py',
     config={},
     requirements=[],
     changelog={

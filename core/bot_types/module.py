@@ -35,7 +35,9 @@ class Module(BotObject):
         Attribute('database_schema', str, None),
         Attribute('config', dict, {}),
         Attribute('requirements', list, []),
-        Attribute('changelog', dict, {})
+        Attribute('changelog', dict, {}),
+        Attribute('is_for_bot', bool, False),
+        Attribute('update_source_link', str, None)
     ]
 
     module_id: str
@@ -51,6 +53,7 @@ class Module(BotObject):
     config: dict
     requirements: list
     changelog: dict
+    is_for_bot: bool
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -93,9 +96,9 @@ class Module(BotObject):
     def full_name(self):
         """
         Makes module's full name
-        Example: name is Tester, module_id is test, full_name is Tester (test)
+        Example: name is Tester, module_id is test, full_name is __Tester__ (`test`)
 
-        :return: module's full name
+        :return: `str` - module's full name
         """
         return ('<i>' + self.decode_string(self.name) + '</i> (<code>' + self.module_id + '</code>)'
                 if self.name else '<code>' + self.module_id + '</code>')
@@ -252,6 +255,9 @@ class Module(BotObject):
                 'changelog_version_is_not_set',
                 module_id=self.module_id,
             ) if not self.version and self.changelog else '',
+            is_for_bot=self.app.get_core_string(
+                'module_is_for_bot' + ('_userbot' if not self.app.me.is_bot else '')
+            ) if self.is_for_bot else ''
         )
 
     def get_short_info(self):
