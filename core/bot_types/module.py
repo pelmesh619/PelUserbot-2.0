@@ -285,20 +285,7 @@ class Module(BotObject):
         return filters.command(commands, prefixes, case_sensitive)
 
     def get_strings_by_lang_code(self, lang_code):
-        return type(
-            'ModuleStrings{}'.format(lang_code.upper()),
-            (ModuleStrings, ),
-            {
-                'lang_code': lang_code,
-                '__call__': wrapper(self.strings.get_string, lang_code),
-                'get_string': wrapper(self.strings.get_string, lang_code),
-                'get_string_form': wrapper(self.strings.get_string_form, lang_code),
-                'get_core_string': wrapper(self.app.get_core_string, lang_code),
-                'get_core_string_form': wrapper(self.app.get_core_string_form, lang_code),
-                'time_to_string': wrapper(time_utils.time_to_string, lang_code, self.app),
-                'date_to_string': wrapper(time_utils.date_to_string, lang_code, self.app),
-            }
-        )()
+        return self.strings.get_strings_by_lang_code(lang_code)
 
 
 def wrapper(func, lang_code, app=None):

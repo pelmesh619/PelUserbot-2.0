@@ -1,11 +1,12 @@
 import logging
 import json
+import re
 import time
 
 from .attribute import Attribute
 from .bot_object import BotObject
 
-from utils import format_text
+from utils import format_text, time_utils
 
 log = logging.Logger(__name__)
 
@@ -14,7 +15,8 @@ class ModuleStrings(BotObject):
     attributes = [
         Attribute('strings', dict, {}),
         Attribute('strings_filename', str, None),
-        Attribute('do_reloading', bool, True)
+        Attribute('do_reloading', bool, True),
+        Attribute('lang_code', str, None)
     ]
 
     strings: dict
@@ -29,13 +31,20 @@ class ModuleStrings(BotObject):
         self.module_id = ''
         self.last_reloading = 0
         self.reload_string()
+        self.lang_code = None
+
+    def get_strings_by_lang_code(self, lang_code):
+        module_strings = ModuleStrings(self.strings, self.strings_filename, self.do_reloading, lang_code)
+        module_strings.module = self.module
+        module_strings.module_id = self.module.module_id
+        return module_strings
 
     def reload_string(self):
         if self.strings_filename and self.do_reloading:
             try:
                 file = json.load(open(self.strings_filename, encoding='utf8'))
             except Exception as e:
-                log.error(f'Error raised while strings of module "{self.module_id}" were reloading', exc_info=True)
+                log.error(f'Error raised while strings of module "{self.module_id}" were reloading', exc_info=e)
             else:
                 self.strings = file
             self.last_reloading = time.time()
@@ -86,7 +95,9 @@ class ModuleStrings(BotObject):
 
     def get_string(self, string_id: str, default=None, lang_code: str = None, **format_kwargs):
         if lang_code is None:
-            lang_code = getattr(self, 'lang_code', self.module.app.lang_code)
+            lang_code = self.lang_code
+        if lang_code is None:
+            lang_code = self.module.app.lang_code
 
         try:
             string = self.find_string(string_id, lang_code=lang_code)
@@ -102,9 +113,11 @@ class ModuleStrings(BotObject):
 
         return string
 
-    def get_string_form(self, string_id: str, value, lang_code: str = None, default=None, **format_kwargs):
+    def get_string_form(self, string_id: str, value, default=None, lang_code: str = None, **format_kwargs):
         if lang_code is None:
-            lang_code = getattr(self, 'lang_code', self.module.app.lang_code)
+            lang_code = self.lang_code
+        if lang_code is None:
+            lang_code = self.module.app.lang_code
 
         try:
             strings = self.find_string(string_id, lang_code)
@@ -141,3 +154,83 @@ class ModuleStrings(BotObject):
 
         return f'[string form "{string_id}" via value "{value}" was ' \
                f'not found in {string_id, lang_code, self.module_id}]'
+
+    def get_core_string(self, string_id: str, default=None, lang_code: str = None, **format_kwargs):
+        if lang_code is None:
+            lang_code = self.lang_code
+
+        return self.module.app.get_core_string(string_id, default, lang_code, **format_kwargs)
+
+    def get_core_string_form(self, string_id: str, value, default=None, lang_code: str = None, **format_kwargs):
+        if lang_code is None:
+            lang_code = self.lang_code
+
+        return self.module.app.get_core_string_form(string_id, value, default, lang_code, **format_kwargs)
+
+    def identify_string(self, string, match_func=re.search, flags=0):
+        strings = self.strings
+        _special_chars_map = {i: '\\' + chr(i) for i in b'()[]<>{}?*+-|^$\\/.&~#'}
+
+        for lang in strings:
+            for str_id in strings[lang]:
+                if isinstance(strings[lang][str_id], dict):
+                    current_strings = list(strings[lang][str_id].values())
+                elif isinstance(strings[lang][str_id], list):
+                    current_strings = strings[lang][str_id]
+                else:
+                    current_strings = [strings[lang][str_id]]
+
+                for current_string in current_strings:
+
+                    pattern = re.compile(re.sub(r'\\\{.*?\\}', '(.*)', current_string.translate(_special_chars_map)),
+                                         flags=flags)
+
+                    match = match_func(pattern, string)
+
+                    if match:
+                        return str_id, lang, match
+
+        return False
+
+    def get_pattern(self, string_id, default=None, lang_code=None):
+        """
+        Makes from string got by string_id regex pattern.
+        How it works: replacement fields (ex '{abc}') will be replaced by '(.*)',
+        other regular special symbols will be replaced with \\
+        Example: 'This <i>module</i> is {module}' => 'This \<i\>module\<\/i\> is (.*)'
+
+        Args:
+            string_id: `str` - string id of the string
+            default: `Any` - if string was not found, `default` will be returned
+            lang_code: `str` - language code
+
+        Returns:
+            pattern: `str`
+        """
+        if not lang_code:
+            lang_code = self.lang_code
+
+        string = self.find_string(string_id, lang_code=lang_code)
+
+        _special_chars_map = {i: '\\' + chr(i) for i in b'()[]<>{}?*+-|^$\\/.&~#'}
+        string = re.compile(re.sub(r'\\\{.*?\\}', '(.*)', string.translate(_special_chars_map)))
+
+        if string == f'[string "{string_id}" was not found {string_id, lang_code}]' or \
+                string == f'[language "{lang_code}" was not found {string_id, lang_code}]':
+            print(string)
+            if default is not None:
+                return default
+
+        return string
+
+    def time_to_string(self, time_value, lang_code=None):
+        if lang_code is None:
+            lang_code = self.lang_code
+
+        return time_utils.time_to_string(time_value, self.module.app, lang_code)
+
+    def date_to_string(self, time_value, lang_code=None):
+        if lang_code is None:
+            lang_code = self.lang_code
+
+        return time_utils.date_to_string(time_value, self.module.app, lang_code)

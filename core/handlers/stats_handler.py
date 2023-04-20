@@ -1,3 +1,4 @@
+import sys
 import time
 
 from pyrogram import Client, filters
@@ -16,6 +17,7 @@ async def stats_handler(app, message):
         handlers_handled=app.handlers_handled,
         handlers_crushed=app.handlers_crushed,
         get_string_calls=app.get_string_calls,
+        system=sys.platform
     )
     await message.reply(respond)
 

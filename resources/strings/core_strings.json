@@ -155,14 +155,14 @@
         "config_enter_module_name": "Введите имя модуля после команды, чтобы посмотреть его настройки. ",
         "config_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>",
         "config_config_template": "Настройки модуля {module_name}:\n\n{parameters}",
-        "config_parameter_template": "{num}. {name} - {value} {default_value}\n",
-        "config_default_template": "({value} по умолчанию)",
+        "config_parameter_template": "{num}. <code>{name}</code> - <code>{value}</code> {default_value}\n",
+        "config_default_template": "(<code>{value}</code> по умолчанию)",
 
 
         "TODO smth with this": "TODO",
         "help_message": "[Помощь по Peluserbot]\n\nКоманды: \n<code>/modules</code> - список установленных модулей\n<code>/module [модуль]</code> - показать информацию о модуле",
 
-        "stats_template": "Статистика бота:\n\nБот работает: {starting_time}\nПрошло времени с прошлой перезагрузки: {last_restart_time}\nВсего обработчиков: {handlers}\nОбработчиков запущено: {handlers_activated}\nОбновлений обработано: {handlers_handled}\nОбновлений обработано с ошибкой: {handlers_crushed}\nВызовов функции выдачи строки: {get_string_calls}",
+        "stats_template": "Статистика бота:\n\nБот работает: {starting_time}\nПрошло времени с прошлой перезагрузки: {last_restart_time}\nВсего обработчиков: {handlers}\nОбработчиков запущено: {handlers_activated}\nОбновлений обработано: {handlers_handled}\nОбновлений обработано с ошибкой: {handlers_crushed}\nВызовов функции выдачи строки: {get_string_calls}\nСистема: {system}",
 
 
         "handler_template": "* <code>{name}</code>, приоритет - {group}",

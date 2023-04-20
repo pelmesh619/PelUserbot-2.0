@@ -10,6 +10,7 @@ from .author import Author, pelmeshke
 from .command import Command
 from .module_strings import ModuleStrings
 from .module_database import ModuleDatabase
+from .filters import *
 
 __version__ = '2.0.0-alpha1'
 

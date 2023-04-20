@@ -9,7 +9,18 @@ async def install_handler(app, message):
         await message.reply_text(app.get_string('install_enter_module_name', _module_id='core.handlers'))
         return
 
-    module = app.install_module(app.plugins['root'] + '.' + module_name, module_id=module_name)
+    try:
+        module = app.install_module(app.plugins['root'] + '.' + module_name, module_id=module_name)
+    except Exception as e:
+        await message.reply_text(
+            app.get_core_string(
+                'install_error_was_raised',
+                module_name=module_name,
+                error=repr(e)
+            )
+        )
+        return
+
 
     await message.reply_text(
         app.get_string(

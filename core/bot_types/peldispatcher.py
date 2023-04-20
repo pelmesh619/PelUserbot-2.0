@@ -32,6 +32,19 @@ class Peldispatcher(Dispatcher):
                     for group_number, group in self.groups.items():
                         for handler in group:
                             args = None
+                            if isinstance(parsed_update, (Message, CallbackQuery, InlineQuery)):
+                                lang_code = None
+                                if self.client.me.is_bot:
+                                    user = getattr(parsed_update, 'from_user', None)
+                                    lang_code = getattr(user, 'language_code', None)
+                                if lang_code is None:
+                                    lang_code = self.client.lang_code
+
+                                module = self.client.get_module(getattr(handler, 'module_id', None))
+                                if module:
+                                    parsed_update.get_string = module.get_strings_by_lang_code(lang_code)
+                                    parsed_update.get_string_form = parsed_update.get_string.get_string_form
+
                             if isinstance(handler, handler_type):
                                 try:
                                     if await handler.check(self.client, parsed_update):
@@ -46,18 +59,7 @@ class Peldispatcher(Dispatcher):
                             if args is None:
                                 continue
 
-                            if isinstance(parsed_update, (Message, CallbackQuery, InlineQuery)):
-                                lang_code = None
-                                if self.client.me.is_bot:
-                                    user = getattr(parsed_update, 'from_user', None)
-                                    lang_code = getattr(user, 'language_code', None)
-                                if lang_code is None:
-                                    lang_code = self.client.lang_code
 
-                                module = self.client.get_module_by_handler(handler, group_number)
-                                if module:
-                                    parsed_update.get_string = module.get_strings_by_lang_code(lang_code)
-                                    parsed_update.get_string_form = parsed_update.get_string.get_string_form
 
                             try:
                                 self.client.handlers_activated += 1

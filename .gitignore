@@ -3,6 +3,7 @@
 /downloads
 /module_configs
 /sessions
+/cache
 __pycache__
 
 config2.json

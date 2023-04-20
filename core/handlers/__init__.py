@@ -3,7 +3,7 @@ import logging
 import importlib
 import re
 
-from core import Module, Author
+from core import Module, Author, ModuleDatabase
 
 
 module_info = Module(
@@ -19,7 +19,7 @@ module_info = Module(
     requirements=[],
     changelog={
         "v0.1.0-alpha": 'string_id=changelog_v0.1.0-alpha'
-    }
+    },
 )
 
 
