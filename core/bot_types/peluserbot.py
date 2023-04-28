@@ -158,6 +158,8 @@ class Peluserbot(Client):
         'database_directory': DATABASE_DIRECTORY,
         'will_error_message_send': True,
         'replace_string_from_other_languages': True,
+        'message_prefix': '',
+        'command_prefix': '/'
     }
     DEFAULT_CONFIG_FILENAME = 'config.json'
 
@@ -409,7 +411,7 @@ class Peluserbot(Client):
                 log.warning('[%s] No plugin loaded from "%s"', self.name, root)
 
     async def terminate(
-        self: "Peluserbot",
+            self: "Peluserbot",
     ):
         """Terminate the client by shutting down workers.
 
@@ -449,7 +451,7 @@ class Peluserbot(Client):
             if module.module_id == module_id:
                 return module
         else:
-            raise KeyError('Module "{}" was not founded'.format(module_id))
+            return
 
     def get_module_by_handler(self, handler, group):
         for module in self.modules:
@@ -472,11 +474,8 @@ class Peluserbot(Client):
         if module_id is None:
             module_id = module_path
 
-        try:
-            self.get_module(module_id)
-        except KeyError:
-            pass
-        else:
+        module = self.get_module(module_id)
+        if module:
             return
 
         warn_non_existent_functions = True
@@ -657,3 +656,58 @@ class Peluserbot(Client):
             disable_web_page_preview=disable_web_page_preview,
             reply_markup=reply_markup
         )
+
+    def set_state(self, chat_id, state, user_id=None):
+        if not user_id:
+            user_id = chat_id
+
+        core_module = self.get_module('core.handlers')
+        user_note = core_module.database.execute_and_fetch(
+            f'SELECT * FROM user_states WHERE user_id = {user_id} AND chat_id = {chat_id}'
+        )
+        if user_note:
+            core_module.database.execute(
+                f'UPDATE user_states SET state_id = \'{state.state_id}\', module_id = \'{state.module.module_id}\''
+                f'WHERE user_id = {user_id} AND chat_id = {chat_id}'
+            )
+        else:
+            core_module.database.execute(
+                f'INSERT INTO user_states (chat_id, user_id, module_id, state_id)'
+                f'VALUES ({chat_id}, {user_id}, \'{state.module.module_id}\', \'{state.state_id}\')'
+            )
+
+    def get_state(self, chat_id, user_id=None):
+        if not user_id:
+            user_id = chat_id
+
+        core_module = self.get_module('core.handlers')
+        user_note = core_module.database.execute_and_fetch(
+            f'SELECT * FROM user_states WHERE user_id = {user_id} AND chat_id = {chat_id}'
+        )
+        if user_note:
+            module_id = user_note[0][3]
+            state_id = user_note[0][4]
+
+            module = self.get_module(module_id)
+            if not module:
+                return
+
+            state = module.get_state_by_id(state_id)
+
+            return state
+        else:
+            return None
+
+    def remove_state(self, chat_id, user_id=None):
+        if not user_id:
+            user_id = chat_id
+
+        core_module = self.get_module('core.handlers')
+        user_note = core_module.database.execute_and_fetch(
+            f'SELECT * FROM user_states WHERE user_id = {user_id} AND chat_id = {chat_id}'
+        )
+        if user_note:
+            core_module.database.execute(
+                f'DELETE FROM user_states WHERE user_id = {user_id} AND chat_id = {chat_id};'
+            )
+

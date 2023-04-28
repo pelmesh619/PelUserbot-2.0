@@ -43,7 +43,8 @@ module = Module(
     changelog={
         "v1.0.0": "string_id=changelog_v1.0.0",
 
-    }
+    },
+    is_for_bot=True,
 )
 
 

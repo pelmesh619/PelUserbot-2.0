@@ -6,7 +6,7 @@ import time
 from .attribute import Attribute
 from .bot_object import BotObject
 
-from utils import format_text, time_utils
+from utils import format_text, time_utils, memory_utils
 
 log = logging.Logger(__name__)
 
@@ -27,7 +27,7 @@ class ModuleStrings(BotObject):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.module = None
+        self._module = None
         self.module_id = ''
         self.last_reloading = 0
         self.reload_string()
@@ -35,9 +35,15 @@ class ModuleStrings(BotObject):
 
     def get_strings_by_lang_code(self, lang_code):
         module_strings = ModuleStrings(self.strings, self.strings_filename, self.do_reloading, lang_code)
-        module_strings.module = self.module
-        module_strings.module_id = self.module.module_id
+        module_strings._module = self._module
+        module_strings.module_id = self._module.module_id
         return module_strings
+
+    def __repr__(self):
+        return 'ModuleStrings(module_id=\'{self.module_id}\', lang_code=\'{self.lang_code}\')'
+
+    def __str__(self):
+        return self.__repr__()
 
     def reload_string(self):
         if self.strings_filename and self.do_reloading:
@@ -50,9 +56,9 @@ class ModuleStrings(BotObject):
             self.last_reloading = time.time()
 
     def find_string(self, string_id: str, lang_code: str):
-        if self.module:
-            if self.module.app:
-                self.module.app.get_string_calls += 1
+        if self._module:
+            if self._module.app:
+                self._module.app.get_string_calls += 1
 
         if self.last_reloading + self.STRINGS_RELOADING_TIME < time.time():
             self.reload_string()
@@ -60,7 +66,7 @@ class ModuleStrings(BotObject):
         strings = getattr(self, 'strings', {})
 
         return_string = None
-        replace_string_from_other_languages = self.module.app.get_config_parameter(
+        replace_string_from_other_languages = self._module.app.get_config_parameter(
             'replace_string_from_other_languages'
         )
 
@@ -97,7 +103,7 @@ class ModuleStrings(BotObject):
         if lang_code is None:
             lang_code = self.lang_code
         if lang_code is None:
-            lang_code = self.module.app.lang_code
+            lang_code = self._module.app.lang_code
 
         try:
             string = self.find_string(string_id, lang_code=lang_code)
@@ -117,7 +123,7 @@ class ModuleStrings(BotObject):
         if lang_code is None:
             lang_code = self.lang_code
         if lang_code is None:
-            lang_code = self.module.app.lang_code
+            lang_code = self._module.app.lang_code
 
         try:
             strings = self.find_string(string_id, lang_code)
@@ -159,13 +165,13 @@ class ModuleStrings(BotObject):
         if lang_code is None:
             lang_code = self.lang_code
 
-        return self.module.app.get_core_string(string_id, default, lang_code, **format_kwargs)
+        return self._module.app.get_core_string(string_id, default, lang_code, **format_kwargs)
 
     def get_core_string_form(self, string_id: str, value, default=None, lang_code: str = None, **format_kwargs):
         if lang_code is None:
             lang_code = self.lang_code
 
-        return self.module.app.get_core_string_form(string_id, value, default, lang_code, **format_kwargs)
+        return self._module.app.get_core_string_form(string_id, value, default, lang_code, **format_kwargs)
 
     def identify_string(self, string, match_func=re.search, flags=0):
         strings = self.strings
@@ -227,10 +233,22 @@ class ModuleStrings(BotObject):
         if lang_code is None:
             lang_code = self.lang_code
 
-        return time_utils.time_to_string(time_value, self.module.app, lang_code)
+        return time_utils.time_to_string(time_value, self._module.app, lang_code)
 
-    def date_to_string(self, time_value, lang_code=None):
+    def date_to_string(self, time_value=None, tz=None, lang_code=None):
         if lang_code is None:
             lang_code = self.lang_code
 
-        return time_utils.date_to_string(time_value, self.module.app, lang_code)
+        return time_utils.date_to_string(time_value, tz, app=self._module.app, lang_code=lang_code)
+
+    def memory_to_string(self, value, measure=None, round_value=2, lang_code=None):
+        if lang_code is None:
+            lang_code = self.lang_code
+
+        return memory_utils.memory_to_string(
+            value,
+            measure=measure,
+            round_value=round_value,
+            app=self._module.app,
+            lang_code=lang_code
+        )

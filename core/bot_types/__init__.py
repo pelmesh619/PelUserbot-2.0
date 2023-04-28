@@ -11,6 +11,7 @@ from .command import Command
 from .module_strings import ModuleStrings
 from .module_database import ModuleDatabase
 from .filters import *
+from .state import State
 
 __version__ = '2.0.0-alpha1'
 

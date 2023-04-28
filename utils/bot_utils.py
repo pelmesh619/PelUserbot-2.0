@@ -121,8 +121,8 @@ def get_progress_func(
         elif progress_type == 'dots':
             return await message.edit(message.text.html.format(dot_type * counter))
         elif progress_type == 'memory':
-            total_memory = memory_to_string(total, message, round_value=3)
-            cur_memory = memory_to_string(cur, message, total.measure, round_value=3).value
+            total_memory = message.get_string.memory_to_string(total, round_value=3)
+            cur_memory = message.get_string.memory_to_string(cur, measure=total_memory.measure, round_value=3).value
             return await message.edit(message.text.html.format(str(cur_memory) + '/' + total_memory))
         elif progress_type == 'bar':
             percent = round(cur / total * 100, 2)

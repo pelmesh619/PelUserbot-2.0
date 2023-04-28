@@ -37,7 +37,8 @@ class Module(BotObject):
         Attribute('requirements', list, []),
         Attribute('changelog', dict, {}),
         Attribute('is_for_bot', bool, False),
-        Attribute('update_source_link', str, None)
+        Attribute('update_source_link', str, None),
+        Attribute('states', list, [])
     ]
 
     module_id: str
@@ -54,13 +55,14 @@ class Module(BotObject):
     requirements: list
     changelog: dict
     is_for_bot: bool
+    states: list
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if isinstance(self.strings, dict):
             self.strings = ModuleStrings(self.strings)
             self.strings.strings_filename = self.strings_source_filename
-        self.strings.module = self
+        self.strings._module = self
         self.app = None
         self.handlers = None
         self.installation_date = 1
@@ -92,6 +94,9 @@ class Module(BotObject):
                 self.database = ModuleDatabase(self.database_schema)
         if self.database:
             self.database.init(self)
+
+        for state in self.states:
+            state.module = self
 
     def full_name(self):
         """
@@ -286,6 +291,11 @@ class Module(BotObject):
 
     def get_strings_by_lang_code(self, lang_code):
         return self.strings.get_strings_by_lang_code(lang_code)
+
+    def get_state_by_id(self, state_id):
+        for state in self.states:
+            if state.state_id == state_id:
+                return state
 
 
 def wrapper(func, lang_code, app=None):

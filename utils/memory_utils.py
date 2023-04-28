@@ -1,6 +1,6 @@
 class MemoryStr(str):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__()
         self._value = None
         self._measure = None
 
@@ -29,16 +29,18 @@ class MemoryStr(str):
         self._value = value
 
 
-def memory_to_string(memory_value, app, measure=None, round_value=2):
+def memory_to_string(memory_value, app, measure=None, round_value=2, lang_code=None):
     sizes = ['b', "kb", "mb", "gb", "tb"]
     count = 0
-    while (memory_value > 1024 or measure is not None) and count < len(sizes):
-        memory_value /= 1024
-        count += 1
-        if measure == sizes[count]:
-            break
+    if measure != sizes[0]:
+        while (memory_value > 1024 or measure is not None) and count < len(sizes):
+            memory_value /= 1024
+            if measure == sizes[count]:
+                break
+            count += 1
 
-    string = MemoryStr(str(round(memory_value, round_value)) + ' ' + app.get_string(f'memory_{sizes[count]}'))
+    string = MemoryStr(str(round(memory_value, round_value)) + ' ' +
+                       app.get_core_string(f'memory_{sizes[count]}', lang_code=lang_code))
 
     string.value = memory_value
     string.measure = sizes[count]

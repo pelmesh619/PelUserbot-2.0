@@ -20,6 +20,13 @@ module_info = Module(
     changelog={
         "v0.1.0-alpha": 'string_id=changelog_v0.1.0-alpha'
     },
+    database_schema='CREATE TABLE IF NOT EXISTS user_states (\n'
+                    'id INTEGER PRIMARY KEY AUTOINCREMENT,\n'
+                    'chat_id BIGINT,\n'
+                    'user_id BIGINT,\n'
+                    'module_id TEXT,\n'
+                    'state_id TEXT\n'
+                    ');'
 )
 
 
