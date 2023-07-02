@@ -5,13 +5,17 @@ import re
 
 from .bot_object import BotObject
 from .peluserbot import Peluserbot
+from .peldispatcher import Peldispatcher
 from .module import Module
 from .author import Author, pelmeshke
 from .command import Command
 from .module_strings import ModuleStrings
 from .module_database import ModuleDatabase
-from .filters import *
+from .bot_filters import *
+from . import bot_filters
 from .state import State
+from .log_formatter import LocalizedFormatter
+from .error_handler import ErrorHandler
 
 __version__ = '2.0.0-alpha1'
 

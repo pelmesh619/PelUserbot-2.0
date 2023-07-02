@@ -1,8 +1,11 @@
+import logging
+
 from pyrogram import Client, filters
-from core import Module, Author
+from core import Module, Author, LocalizedFormatter, Peluserbot
 
 __version__ = 'v1.2.0-delta'
 
+from core.bot_types import bot_filters
 
 module = Module(
     module_id='test',
@@ -14,13 +17,15 @@ module = Module(
     strings={
         'ru': {
             'test_module_name': 'Тестовый модуль',
-            'description': 'Модуль проверяет работоспособность бота через команду /test',
+            'description': 'Модуль проверяет работоспособность бота через команду {_cmd_pref}test',
             'author_creator': 'Создатель',
             'bot_works': 'Бот работает',
-            'docs_test_handler': 'На команду `/test` отвечает ответным сообщением. Если сообщение не было '
+            'test_error': 'Тестовая ошибка',
+            'docs_test_handler': 'На команду `{_cmd_pref}test` отвечает ответным сообщением. Если сообщение не было '
                                  'отправлено, то с ботом что-то не так. Не принимает аргументов.',
             'docs_test_from_me_handler': 'На команду `!test` изменяет сообщение. Если сообщение не было '
                                  'изменено, то с ботом что-то не так. Не принимает аргументов.',
+            'runtime_error_is_raised': 'Во время обработки вашего запроса возникла ошибка: {details}',
             'changelog_v1.0.0': 'Релиз',
 
         },
@@ -29,8 +34,9 @@ module = Module(
             'description': 'Module checks bot\'s working',
             'author_creator': 'Creator',
             'bot_works': 'Bot works',
-            'docs_test_handler': 'Replies message on command `/test`. If message was not sent there is something '
-                                 'wrong with bot. Does not take any arguments.',
+            'test_error': 'Testing error',
+            'docs_test_handler': 'Replies message on command `{_cmd_pref}test`. If message was not sent there is '
+                                 'something wrong with bot. Does not take any arguments.',
             'docs_test_from_me_handler': 'Edits message on command `!test`. If message was not edited '
                                          'there is something wrong with bot. Does not take any arguments.',
             'changelog_v1.0.0': 'Release',
@@ -65,7 +71,12 @@ async def test_from_me_handler(_, msg):
     await msg.edit(module.get_string('bot_works'))
 
 
-@Client.on_message(filters.command('fuck', ['!']))
-async def test_from_me_2_handler(_, msg):
-    await msg.reply(module.get_string('fuck'))
+@Client.on_message(filters.command('error'))
+async def error_handler(_, msg):
+    raise RuntimeError(msg.get_string('test_error'))
+
+
+@Peluserbot.on_error(bot_filters.exception(RuntimeError))
+async def error_catcher(_, msg):
+    await msg.reply(msg.get_string('runtime_error_is_raised', details=msg.exception.args[0]))
 

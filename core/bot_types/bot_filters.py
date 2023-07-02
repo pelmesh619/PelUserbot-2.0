@@ -1,6 +1,7 @@
+import inspect
 import re
 import html
-from typing import Union, List
+from typing import Union, List, Callable
 
 from pyrogram import filters, enums
 from pyrogram.types import CallbackQuery, Message, InlineQuery
@@ -8,7 +9,7 @@ from pyrogram.types import CallbackQuery, Message, InlineQuery
 filters.old_me = filters.me
 
 
-async def admin(f, b, m):
+async def admin_filter_function(_, b, m):
     if isinstance(m, CallbackQuery):
         m = m.message
         user = m.from_user
@@ -21,7 +22,24 @@ async def admin(f, b, m):
     return chat_member.status in [enums.ChatMemberStatus.OWNER, enums.ChatMemberStatus.ADMINISTRATOR]
 
 
-filters.admin = filters.create(admin)
+admin = filters.create(admin_filter_function)
+filters.admin = admin
+
+
+async def i_am_bot_filter_function(_, b, __):
+    return b.me.is_bot
+
+
+i_am_bot = filters.create(i_am_bot_filter_function)
+filters.i_am_bot = i_am_bot
+
+
+async def i_am_user_filter_function(_, b, __):
+    return not b.me.is_bot
+
+
+i_am_user = filters.create(i_am_user_filter_function)
+filters.i_am_user = i_am_user
 
 
 def identify_string(string_ids, matching_func=re.search, flags=0):
@@ -63,7 +81,7 @@ filters.identify_string = identify_string
 def reply_identify_string(string_ids, matching_func=re.search, flags=0):
     string_ids = string_ids if isinstance(string_ids, list) else [string_ids]
 
-    async def func(f, b, m):
+    async def func(_, __, m):
         reply = m.reply_to_message
         if not reply:
             return False
@@ -96,14 +114,15 @@ filters.reply_identify_string = reply_identify_string
 filters.custom_command = filters.command
 
 
-def get_prefixes(flt, app):
-    if flt.prefixes is None:
-        current_prefixes = app.get_command_prefixes()
-        if current_prefixes is None:
-            return ('/',)
-        return current_prefixes
+def get_prefixes(flt):
+    if flt._prefixes is None:
+        if flt.client:
+            current_prefixes = flt.client.get_command_prefixes()
+            if current_prefixes is not None:
+                return current_prefixes
+        return ('/',)
 
-    return flt.prefixes
+    return flt._prefixes
 
 
 def dynamic_command(
@@ -113,8 +132,9 @@ def dynamic_command(
 ):
     command_re = re.compile(r"([\"'])(.*?)(?<!\\)\1|(\S+)")
 
-
     async def func(flt, client, message):
+        if flt.client is None:
+            flt.client = client
         username = client.me.username or ""
         text = message.text or message.caption
         message.command = None
@@ -122,7 +142,7 @@ def dynamic_command(
         if not text:
             return False
 
-        for prefix in flt.get_prefixes:
+        for prefix in flt.get_prefixes():
             if not text.startswith(prefix):
                 continue
 
@@ -152,15 +172,54 @@ def dynamic_command(
     commands = commands if isinstance(commands, list) else [commands]
     commands = {c if case_sensitive else c.lower() for c in commands}
 
-    prefixes = [] if prefixes is None else prefixes
-    prefixes = prefixes if isinstance(prefixes, list) else [prefixes]
-    prefixes = set(prefixes) if prefixes else {""}
+    if prefixes is not None:
+        prefixes = prefixes if isinstance(prefixes, list) else [prefixes]
+        prefixes = set(prefixes) if prefixes else {""}
 
     return filters.create(
         func,
         "CommandFilter",
         commands=commands,
-        prefixes=prefixes,
+        prefixes=property(lambda self: self.get_prefixes()),
+        _prefixes=prefixes,
+        case_sensitive=case_sensitive,
         get_prefixes=get_prefixes,
-        case_sensitive=case_sensitive
+        client=None,
     )
+
+
+filters.command = dynamic_command
+
+
+def exception(
+        exception_type=Exception,
+        filter_function: Callable = lambda _, __, ___: True,
+):
+    async def func(flt, client, update):
+        this_exception = update.exception
+
+        if not isinstance(this_exception, exception_type):
+            return False
+
+        if inspect.iscoroutinefunction(filter_function):
+            x = await filter_function(flt, client, update)
+        else:
+            x = await client.loop.run_in_executor(
+                client.executor,
+                filter_function,
+                flt, client, update
+            )
+
+        if not x:
+            return False
+
+        return True
+
+    return filters.create(
+        func,
+        "ExceptionFilter",
+        exception_type=exception_type,
+    )
+
+
+filters.exception = exception

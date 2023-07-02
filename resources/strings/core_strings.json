@@ -24,6 +24,11 @@
             "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "модуля",
             "lambda x: True": "модулей"
         },
+        "job_form": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "работа",
+            "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "работы",
+            "lambda x: True": "работ"
+        },
         "added_form": {
             "lambda x: x % 10 == 1 and x % 100 != 11": "добавлен",
             "lambda x: True": "добавлено"
@@ -61,8 +66,9 @@
             "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "секунды",
             "lambda x: True": "секунд"
         },
-        "date_template": "{hours}:{minutes}:{seconds} (UTC{timezone}), {day}{suffix} {month}, {day_week}, {year} год",
-        "short_date_template": "{hours}:{minutes}:{seconds} (UTC{timezone}) {day}.{month}.{year}",
+        "date_template": "{day}{suffix} {month}, {day_week}, {year} год",
+        "datetime_template": "{hours}:{minutes}:{seconds} (UTC{timezone}), {day}{suffix} {month}, {day_week}, {year} год",
+        "short_datetime_template": "{hours}:{minutes}:{seconds} (UTC{timezone}) {day}.{month}.{year}",
         "date_day_suffixes": {
             "lambda x: x % 10 == 3 and not (x % 100 == 13)": "-ье",
             "lambda x: True": "-ое"
@@ -105,38 +111,43 @@
         "description_template": "Описание: \n    {description}\n",
         "requirements_template": "Зависимости: {requirements}\n",
         "localization_template": "Локализация: {languages}\n",
-        "handlers_template": "{handlers_count} {handlers_form}:\n    1. {first_handler} - {first_handler_type}: {first_handler_filter_string}<i>{first_handler_docs}</i>\n    {and_handlers_more}(<code>/commands {module_id}</code>)",
+        "handlers_template": "{handlers_count} {handlers_form}:\n    1. {first_handler} - {first_handler_type}: {first_handler_filter_string}<i>{first_handler_docs}</i>\n    {and_handlers_more}(<code>{_cmd_pref}commands {module_id}</code>)",
         "and_handlers_more": "и еще {and_handlers_count_more} {and_handler_more_form} ",
 
         "handlers_there_are_no_handlers": "Обработчиков нет",
-        "config_template": "Настройки модуля: {configs_count} {parameter_form} (<code>/config {module_id}</code>)\n",
-        "changelog_template": "Список изменений ({current_version}) (<code>/changelog {module_id}</code>): \n    {changelog_current_version} ",
-        "changelog_there_is_no_changelog_of_this_version": "Списка изменения версии {current_version} не найдено, но доступен список изменений других версий. (<code>/changelog {module_id}</code>)",
-        "changelog_version_is_not_set": "Версия модуля не установлена, но доступен список изменений других версий. (<code>/changelog {module_id}</code>)",
-        "module_enter_module_name": "Введите идентификатор модуля после команды, чтобы посмотреть информацию о нем. Например: <code>/module test</code>",
-        "module_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>",
+        "config_template": "Настройки модуля: {configs_count} {parameter_form} (<code>{_cmd_pref}config {module_id}</code>)\n",
+        "changelog_template": "Список изменений ({current_version}) (<code>{_cmd_pref}changelog {module_id}</code>): \n    {changelog_current_version} ",
+        "changelog_there_is_no_changelog_of_this_version": "Списка изменения версии {current_version} не найдено, но доступен список изменений других версий. (<code>{_cmd_pref}changelog {module_id}</code>)",
+        "changelog_version_is_not_set": "Версия модуля не установлена, но доступен список изменений других версий. (<code>{_cmd_pref}changelog {module_id}</code>)",
+        "module_enter_module_name": "Введите идентификатор модуля после команды, чтобы посмотреть информацию о нем. Например: <code>{_cmd_pref}module test</code>",
+        "module_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>{_cmd_pref}modules</code>",
 
         "error_raised_while_handler_was_proceed":
             "Во время выполнения обработчика в функции <code>{func}</code> возникла неожиданная ошибка: \n\n<code>{error}</code>\n\nПроверьте консоль для полной информации",
         "error_raised_while_handler_was_proceed_in_module":
             "Во время выполнения обработчика в модуле {module_name} в функции <code>{func}</code> возникла неожиданная ошибка: \n\n<code>{error}</code>\n\nПроверьте консоль для полной информации",
 
+        "traceback_template": "Трейсбек исключения:\n{traceback}\n{error}: {error_text}",
+        "traceback_frame": "  В файле \"{filename}\", в строке {line}, в {name}\n    {code}",
+        "traceback_frame_without_name": "  В файле \"{filename}\", в строке {line}\n{code}",
+        "traceback_no_detail": "<подробности не предоставлены>",
+
         "command_info_template": "Обработчик №{num} <code>{func_name}</code> модуля {module_name}\n\n{handler_type}: {filter_string}\n{docs_template}",
         "command_docs_template": "Описание: \n    {docs}",
-        "command_module_not_found": "Модуль {module_id} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>",
+        "command_module_not_found": "Модуль {module_id} не был найден. Вы можете посмотреть список установленных модулей через команду <code>{_cmd_pref}modules</code>",
         "command_module_not_found_and_enter_command":
-            "Модуль {module_id} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>\nТакже введите после модуля обработчик или его номер, чтобы посмотреть информацию о нем",
-        "command_enter_module_name": "Введите модуль и имя обработчика или его номер после команды, чтобы посмотреть информацию об обработчике. \nНапример: <code>/command test 1</code>, <code>/command test test_handler</code>",
-        "command_command_not_found_by_index": "Модуль {module_name} имеет {count_of_handlers} {handler_form}. Используйте команду <code>/commands {module_id}</code>, чтобы посмотреть обработчики модуля",
+            "Модуль {module_id} не был найден. Вы можете посмотреть список установленных модулей через команду <code>{_cmd_pref}modules</code>\nТакже введите после модуля обработчик или его номер, чтобы посмотреть информацию о нем",
+        "command_enter_module_name": "Введите модуль и имя обработчика или его номер после команды, чтобы посмотреть информацию об обработчике. \nНапример: <code>{_cmd_pref}command test 1</code>, <code>{_cmd_pref}command test test_handler</code>",
+        "command_command_not_found_by_index": "Модуль {module_name} имеет {count_of_handlers} {handler_form}. Используйте команду <code>{_cmd_pref}commands {module_id}</code>, чтобы посмотреть обработчики модуля",
         "command_command_not_found_by_command":
             "Модуль {module_name} не имеет обработчика {command_name}. Используйте команду <code>/commands {module_id}</code>, чтобы посмотреть обработчики модуля",
-        "command_enter_command": "Введите имя обработчика или его номер, чтобы посмотреть информацию о нем. Например: <code>/command test 1</code>, <code>/command test test_handler</code>",
+        "command_enter_command": "Введите имя обработчика или его номер, чтобы посмотреть информацию о нем. Например: <code>{_cmd_pref}command test 1</code>, <code>{_cmd_pref}command test test_handler</code>",
 
-        "commands_enter_module_name": "Введите идентификатор модуля после команды, чтобы посмотреть информацию о нем. Например: <code>/module test</code>",
-        "commands_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>",
+        "commands_enter_module_name": "Введите идентификатор модуля после команды, чтобы посмотреть информацию о нем. Например: <code>{_cmd_pref}module test</code>",
+        "commands_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>{_cmd_pref}modules</code>",
         "commands_module_does_not_have_commands": "Модуль {module_name} не имеет обработчиков",
         "commands_template": "Обработчики модуля {module_name}:\n\n{commands}Всего {handlers_count} {handlers_form}",
-        "short_command_template": "{num}. <code>{handler}</code> - {handler_type}: {filter_string}{docs} (<code>/command {module_id} {handler}</code>)",
+        "short_command_template": "{num}. <code>{handler}</code> - {handler_type}: {filter_string}{docs} (<code>{_cmd_pref}command {module_id} {handler}</code>)",
 
         "install_enter_module_name": "Введите имя модуля после команды, чтобы установить его. ",
         "install_module_was_installed": "Модуль {module_name} успешно установлен: {added_form} {handlers_count} {handler_form}",
@@ -153,15 +164,15 @@
         "install_module_was_moved_rewriting": "Модуль в файле {module_name} в папке Модули был перезаписан, происходит установка...",
         "install_module_was_moved_moving": "Модуль в файле {module_name} был перемещен в папку Модули, происходит установка...",
         "install_error_was_raised_backup": "При установке модуля {module_name} возникла ошибка, была загружена старая версия модуля: \n\n<code>{error}</code>\n\nПроверьте консоль для дополнительной информации",
-        "install_this_module_was_installed": "Модуль {module_name} уже установлен (<code>/module {module_id}</code>)",
+        "install_this_module_was_installed": "Модуль {module_name} уже установлен (<code>{_cmd_pref}module {module_id}</code>)",
 
         "uninstall_enter_module_name": "Введите имя модуля после команды, чтобы удалить его. ",
-        "uninstall_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>",
+        "uninstall_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>{_cmd_pref}modules</code>",
         "uninstall_module_was_uninstalled": "Модуль {module_name} успешно удален: {removed_form} {handlers_count} {handler_form}",
 
         "reload_module_was_uninstalled": "Модуль {module_name} был удален",
         "reload_module_was_reloaded": "Модуль {module_name} был перезагружен: {added_handlers}{reloaded_handlers}{removed_handlers}",
-        "reload_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>",
+        "reload_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>{_cmd_pref}modules</code>",
         "reload_enter_module_name": "Введите имя модуля после команды, чтобы перезагрузить его. ",
         "added_handlers_template": "\n*  {added_form} {added_handlers_count} {added_handler_form}",
         "reloaded_handlers_template": "\n*  {reloaded_form} {reloaded_handlers_count} {reloaded_handler_form}",
@@ -173,19 +184,19 @@
         "message_is_outdated": "Сообщение устарело",
 
         "modules_template": "Список модулей:\n\n{modules}\nВсего {modules_count} {module_form}",
-        "module_short_info": "* {module_name}, {handlers_count} {handler_form}{description} (<code>/module {module_id}</code>)\n",
+        "module_short_info": "* {module_name}, {handlers_count} {handler_form}{description} (<code>{_cmd_pref}module {module_id}</code>)\n",
 
         "config_enter_module_name": "Введите имя модуля после команды, чтобы посмотреть его настройки. ",
-        "config_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>/modules</code>",
+        "config_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>{_cmd_pref}modules</code>",
         "config_config_template": "Настройки модуля {module_name}:\n\n{parameters}",
         "config_parameter_template": "{num}. <code>{name}</code> - <code>{value}</code> {default_value}\n",
         "config_default_template": "(<code>{value}</code> по умолчанию)",
 
 
         "TODO smth with this": "TODO",
-        "help_message": "[Помощь по Peluserbot]\n\nКоманды: \n<code>/modules</code> - список установленных модулей\n<code>/module [модуль]</code> - показать информацию о модуле",
+        "help_message": "[Помощь по Peluserbot]\n\nКоманды: \n<code>{_cmd_pref}modules</code> - список установленных модулей\n<code>{_cmd_pref}module [модуль]</code> - показать информацию о модуле",
 
-        "stats_template": "Статистика бота:\n\nБот работает: {starting_time}\nПрошло времени с прошлой перезагрузки: {last_restart_time}\nВсего обработчиков: {handlers}\nОбработчиков запущено: {handlers_activated}\nОбновлений обработано: {handlers_handled}\nОбновлений обработано с ошибкой: {handlers_crushed}\nВызовов функции выдачи строки: {get_string_calls}\nСистема: {system}",
+        "stats_template": "<b>Информация бота</b>:\n\n<i>Версия</i>: <code>{version}</code>\n<i>Платформа сервера</i>: <code>{system}</code>\n\n<i>Бот работает</i>: {time_to_string(starting_time)}\n<i>Прошло времени с прошлой перезагрузки</i>: {time_to_string(last_restart_time)}\n\n<i>Модулей установлено</i>: {modules}\n<i>Обработчиков установлено</i>: {handlers}\n<i>Обработчиков запущено</i>: {handlers_activated}\n<i>Обновлений обработано</i>: {handlers_handled}\n<i>Обновлений обработано с ошибкой</i>: {handlers_crushed}\n<i>Вызовов функции выдачи строки</i>: {get_string_calls}",
 
 
         "handler_template": "* <code>{name}</code>, приоритет - {group}",
@@ -197,11 +208,27 @@
         "handlers_page_forward_switch": "Ответьте <code>></code>, чтобы пролистнуть вперед",
         "handlers_page_backward_switch": "Ответьте <code><</code>, чтобы пролистнуть назад",
 
+        "scheduler_template": "<b>Планировщик задач</b>. Всего {amount} {job_form}: \n\n{jobs}",
+        "scheduler_job_template": "Работа <code>{name}</code> (ID - <code>{id}</code>)\n    Триггер: {trigger}\n    Описание: {desc}",
+        "scheduler_no_docs": "отсутствует",
+        "scheduler_there_are_no_jobs": "<b>Планировщик задач</b>. Работы не заданы",
+
         "wait_answer_filter_description": "Фильтрует сообщения, который являются ответом на сообщение, которое ждет ответа",
 
         "filter_and": "И",
         "filter_or": "ИЛИ",
         "filter_not": "НЕ",
+
+        "filter_re_no_flag": "отсутствуют",
+        "filter_re_flag_template_mode": "режим шаблона",
+        "filter_re_flag_ignore_case": "<code>re.IGNORECASE</code>",
+        "filter_re_flag_locale": "<code>re.LOCALE</code>",
+        "filter_re_flag_multiline": "<code>re.MULTILINE</code>",
+        "filter_re_flag_dotall": "<code>re.DOTALL</code>",
+        "filter_re_flag_unicode": "<code>re.UNICODE</code>",
+        "filter_re_flag_verbose": "<code>re.VERBOSE</code>",
+        "filter_re_flag_debug": "<code>re.DEBUG</code>",
+        "filter_re_flag_ascii": "<code>re.ASCII</code>",
 
         "filter_all": "любые",
         "filter_animation": "с анимацией (гифкой)",
@@ -265,17 +292,239 @@
         "filter_voice": "с голосовым сообщением",
         "filter_web_page": "с предпросмотром сайта",
 
+        "filter_i_am_user": "в случае, если я не бот,",
+        "filter_i_am_bot": "в случае, если я бот,",
+
         "handler_MessageHandler": "обрабатывает сообщения",
         "handler_EditedMessageHandler": "обрабатывает измененные сообщения",
+        "handler_CallbackQueryHandler": "обрабатывает нажатия на инлайн-кнопки",
 
         "ru_language": "русский язык\uD83C\uDDF7\uD83C\uDDFA",
         "en_language": "английский язык\uD83C\uDDEC\uD83C\uDDE7",
-        "ge_language": "немецкий язык\uD83C\uDDE9\uD83C\uDDEA"
+        "ge_language": "немецкий язык\uD83C\uDDE9\uD83C\uDDEA",
+
+        "logging_level_INFO": "ИНФО",
+        "logging_level_DEBUG": "ДЕБАГ",
+        "logging_level_WARNING": "ПРЕДУПРЕЖДЕНИЕ",
+        "logging_level_ERROR": "ОШИБКА",
+        "logging_level_CRITICAL": "КРИТИЧЕСКАЯ ОШИБКА"
     },
     "en": {
+        "core_module_name": "Core",
+        "description": "Bot's core. It interacts with the system. It is better to not delete it",
+        "author_creator": "Creator",
+        "changelog_v0.1.0-alpha": "Test version",
+
+        "author_form": {
+            "lambda x: x < 2": "Author",
+            "lambda x: True": "Authors"
+        },
+        "handler_form": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "handler",
+            "lambda x: True": "handlers"
+        },
+        "parameter_form": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "parameter",
+            "lambda x: True": "parameters"
+        },
+        "module_form": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "module",
+            "lambda x: True": "modules"
+        },
+        "job_form": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "job",
+            "lambda x: True": "jobs"
+        },
+        "added_form": {
+            "lambda x: True": "added"
+        },
+        "removed_form": {
+            "lambda x: True": "removed"
+        },
+        "reloaded_form": {
+            "lambda x: True": "reloaded"
+        },
+        "time_month": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "month",
+            "lambda x: True": "months"
+        },
+        "time_day": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "day",
+            "lambda x: True": "days"
+        },
+        "time_hour": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "hour",
+            "lambda x: True": "hours"
+        },
+        "time_minute": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "minute",
+            "lambda x: True": "minutes"
+        },
+        "time_second": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "second",
+            "lambda x: True": "seconds"
+        },
+        "date_template": "{hours}:{minutes}:{seconds} (UTC{timezone}),  {month}, {day}{suffix}, {day_week}, {year}",
+        "short_date_template": "{hours}:{minutes}:{seconds} (UTC{timezone}) {month}.{day}.{year}",
+        "date_day_suffixes": {
+            "lambda x: x % 10 == 1 and not (x % 100 == 11)": "st",
+            "lambda x: x % 10 == 2 and not (x % 100 == 12)": "nd",
+            "lambda x: x % 10 == 3 and not (x % 100 == 13)": "rd",
+            "lambda x: True": "th"
+        },
+        "date_weekday_1": "Monday",
+        "date_weekday_2": "Tuesday",
+        "date_weekday_3": "Wednesday",
+        "date_weekday_4": "Thursday",
+        "date_weekday_5": "Friday",
+        "date_weekday_6": "Saturday",
+        "date_weekday_7": "Sunday",
+        "date_month_1": "January",
+        "date_month_2": "February",
+        "date_month_3": "March",
+        "date_month_4": "April",
+        "date_month_5": "May",
+        "date_month_6": "June",
+        "date_month_7": "July",
+        "date_month_8": "August",
+        "date_month_9": "September",
+        "date_month_10": "October",
+        "date_month_11": "November",
+        "date_month_12": "December",
+
+        "memory_b": "B",
+        "memory_kb": "KB",
+        "memory_mb": "MB",
+        "memory_gb": "GB",
+        "memory_tb": "TB",
+
+        "author_unknown": "unknown",
+        "version_unknown": "unknown",
+
+        "rename_reply": "Rename {f}",
+        "rewrite_reply": "Rewrite",
+        "cancel_reply": "Cancel",
+
+
+        "module_full_info_template": "Module {name}\n{author_form}: {authors}\nVersion: {version}\n{description_template}{localization_template}\n{handlers_template}\n\n{requirements_template}{config_template}{changelog_template}",
+        "description_template": "Description: \n    {description}\n",
+        "requirements_template": "Requirements: {requirements}\n",
+        "localization_template": "Localization: {languages}\n",
+        "handlers_template": "{handlers_count} {handlers_form}:\n    1. {first_handler} - {first_handler_type}: {first_handler_filter_string}<i>{first_handler_docs}</i>\n    {and_handlers_more}(<code>{_cmd_pref}commands {module_id}</code>)",
+        "and_handlers_more": "and {and_handlers_count_more} {and_handler_more_form} more",
+
+        "handlers_there_are_no_handlers": "There are no handlers",
+        "config_template": "Module's config: {configs_count} {parameter_form} (<code>{_cmd_pref}config {module_id}</code>)\n",
+        "changelog_template": "Changelog ({current_version}) (<code>{_cmd_pref}changelog {module_id}</code>): \n    {changelog_current_version} ",
+        "changelog_there_is_no_changelog_of_this_version": "There is no changelog of version {current_version}, but changelogs of other versions is available. (<code>{_cmd_pref}changelog {module_id}</code>)",
+        "changelog_version_is_not_set": "Module version is not set, but changelogs of other versions is available. (<code>{_cmd_pref}changelog {module_id}</code>)",
+        "module_enter_module_name": "Enter module id to see information about it. For example: <code>{_cmd_pref}module test</code>",
+        "module_module_not_found": "Module {module_name} was not found. You can see the list of installed modules via command <code>{_cmd_pref}modules</code>",
+
+        "error_raised_while_handler_was_proceed":
+            "While handler in function <code>{func}</code> was executed unexpected error was raised: \n\n<code>{error}</code>\n\nCheck console for more information",
+        "error_raised_while_handler_was_proceed_in_module":
+            "While handler in function <code>{func}</code>, in module {module_name} was executed unexpected error was raised: \n\n<code>{error}</code>\n\nCheck console for more information",
+
+        "traceback_template": "Traceback:\n{traceback}\n{error}: {error_text}",
+        "traceback_frame": "  File \"{filename}\", line {line}, in {name}\n    {code}",
+        "traceback_frame_without_name": "  File \"{filename}\", in {line}\n{code}",
+        "traceback_no_detail": "<details are not provided>",
+
+        "command_info_template": "Handler №{num} <code>{func_name}</code> in module {module_name}\n\n{handler_type}: {filter_string}\n{docs_template}",
+        "command_docs_template": "Description: \n    {docs}",
+        "command_module_not_found": "Module {module_id} was not found. You can see the list of installed modules via command <code>{_cmd_pref}modules</code>",
+        "command_module_not_found_and_enter_command":
+            "Module {module_id} was not found. You can see the list of installed modules via command <code>{_cmd_pref}modules</code>\nAlso enter handler or its number after module id to see information about it",
+        "command_enter_module_name": "Enter module id and handler or its number after command to see information about handler. \nFor example: <code>{_cmd_pref}command test 1</code>, <code>{_cmd_pref}command test test_handler</code>",
+        "command_command_not_found_by_index": "Module {module_name} has {count_of_handlers} {handler_form}. Use command <code>{_cmd_pref}commands {module_id}</code> to see module's handlers",
+        "command_command_not_found_by_command":
+            "Module {module_name} has not handler {command_name}. Use command <code>{_cmd_pref}commands {module_id}</code> to see module's handlers",
+        "command_enter_command": "Enter handler or its number after module id to see information about it. For example: <code>{_cmd_pref}command test 1</code>, <code>{_cmd_pref}command test test_handler</code>",
+
+        "commands_enter_module_name": "Enter module id after command to see information about it. For example: <code>{_cmd_pref}commands test</code>",
+        "commands_module_not_found": "Module {module_name} was not found. You can see the list of installed modules via command <code>{_cmd_pref}modules</code>",
+        "commands_module_does_not_have_commands": "Module {module_name} has not handlers",
+        "commands_template": "Handlers of module {module_name}:\n\n{commands}Total is {handlers_count} {handlers_form}",
+        "short_command_template": "{num}. <code>{handler}</code> - {handler_type}: {filter_string}{docs} (<code>{_cmd_pref}command {module_id} {handler}</code>)",
+
+        "filter_all": "any",
+        "filter_animation": "with animation (GIF)",
+        "filter_audio": "with audio",
+        "filter_bot": "from bot",
+        "filter_caption": "with caption",
+        "filter_channel": "in channel",
+        "filter_channel_chat_created": "declaring channel creation",
+        "filter_contact": "with contact",
+        "filter_delete_chat_photo": "declaring chat photo deletion",
+        "filter_dice": "with dice",
+        "filter_document": "with document",
+        "filter_forwarded": "forwarded",
+        "filter_from_chat": "from chat",
+        "filter_from_chats": "from chats",
+        "filter_from_command": "on command",
+        "filter_from_commands": "on commands",
+        "filter_from_scheduled": "scheduled and sended",
+        "filter_from_user": "from user",
+        "filter_from_users": "from users",
+        "filter_game": "with game",
+        "filter_game_high_score": "declaring high score in game",
+        "filter_group": "in group",
+        "filter_group_chat_created": "declaring chat creation",
+        "filter_incoming": "incoming",
+        "filter_inline_keyboard": "with inline keyboard",
+        "filter_left_chat_member": "declaring chat member exiting",
+        "filter_linked_channel": "sended by linked channel",
+        "filter_location": "with location",
+        "filter_me": "from me",
+        "filter_media": "with any media",
+        "filter_media_group": "with media group",
+        "filter_media_spoiler": "with media spoiler",
+        "filter_mentioned": "with mention like @telegram",
+        "filter_migrate_from_chat_id": "declaring migration from chat",
+        "filter_migrate_to_chat_id": "declaring migration in chat",
+        "filter_new_chat_members": "declaring new chat members",
+        "filter_new_chat_photo": "declaring new chat photo",
+        "filter_new_chat_title": "declaring new chat title",
+        "filter_outgoing": "outgoing",
+        "filter_photo": "with photo",
+        "filter_pinned_message": "declaring message pinning",
+        "filter_poll": "with poll",
+        "filter_private": "in private messages",
+        "filter_regex": "matching repular expression",
+        "filter_regex_flags": "flags:",
+        "filter_reply": "with reply",
+        "filter_reply_keyboard": "with keyboard",
+        "filter_scheduled": "scheduled",
+        "filter_service": "service",
+        "filter_sticker": "with sticker",
+        "filter_supergroup_chat_created": "declaring supergroup creation",
+        "filter_text": "text",
+        "filter_venue": "with venue",
+        "filter_via_bot": "sended via bot",
+        "filter_video": "with video",
+        "filter_video_chat_ended": "declaring video chat end",
+        "filter_video_chat_members_invited": "inviting members into video chat",
+        "filter_video_chat_started": "declaring video chat start",
+        "filter_video_note": "with video note",
+        "filter_voice": "with voice",
+        "filter_web_page": "with web page",
+
+        "filter_i_am_user": "in case i am user",
+        "filter_i_am_bot": "in case i am bot",
+
+
+
+
         "ru_language": "russian\uD83C\uDDF7\uD83C\uDDFA",
         "en_language": "english\uD83C\uDDEC\uD83C\uDDE7",
-        "ge_language": "german\uD83C\uDDE9\uD83C\uDDEA"
+        "ge_language": "german\uD83C\uDDE9\uD83C\uDDEA",
+
+        "logging_level_INFO": "INFO",
+        "logging_level_DEBUG": "DEBUG",
+        "logging_level_WARNING": "WARNING",
+        "logging_level_ERROR": "ERROR",
+        "logging_level_CRITICAL": "CRITICAL"
 
     }
 }

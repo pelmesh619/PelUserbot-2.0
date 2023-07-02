@@ -21,20 +21,21 @@ all_filters = ['me', 'bot', 'text', 'reply', 'audio', 'document', 'photo',
                'video_chat_started', 'video_chat_ended', 'video_chat_members_invited', 'service',
                'media', 'scheduled', 'from_scheduled', 'linked_channel',
                'from_command', 'from_commands', 'from_user', 'from_users', 'from_chat', 'from_chats', 'regex',
-               'and', 'or', 'not'
+               'and', 'or', 'not',
+               'i_am_user', 'i_am_bot', 'admin'
                ]
 
-re_flags = {
-    1: 'template_mode',  # template mode
-    2: 'ignore_case',  # ignore case sensitivity
-    4: 'locale',  # use current locale
-    8: 'multiline',  # treat target as multiline string
-    16: 'dotall',  # dot matches \n
-    32: 'unicode',  # use unicode "locale"
-    64: 'verbose',  # ignore whitespace and comments
-    128: 'debug',  # debug mode
-    256: 'ascii',  # use ascii "locale"
-}
+re_flags = [
+    'template_mode',  # template mode
+    'ignore_case',  # ignore case sensitivity
+    'locale',  # use current locale
+    'multiline',  # treat target as multiline string
+    'dotall',  # dot matches \n
+    'unicode',  # use unicode "locale"
+    'verbose',  # ignore whitespace and comments
+    'debug',  # debug mode
+    'ascii',  # use ascii "locale"
+]
 
 
 class Command(BotObject):
@@ -45,7 +46,7 @@ class Command(BotObject):
         Attribute('filters', Filter),
         Attribute('filter_string', str, ''),
         Attribute('documentation', str, None),
-        Attribute('handler_type', str, '')
+        Attribute('handler_type', str, ''),
     ]
 
     filter_string: str
@@ -55,10 +56,12 @@ class Command(BotObject):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.module = None
-        self.filter_string = self.filter_string if self.filter_string else repr_filter(self.filters)
         self.command_filters = []
         self.resolved_filters = resolve_filter(self.filters, self.command_filters)
-        self.documentation = self.documentation
+
+    def init(self, module):
+        self.module = module
+        self.filter_string = self.filter_string if self.filter_string else repr_filter(self, self.filters)
 
     def repr_filter_with_get_string(self):
         to_replace = re.finditer(r'\{(filter_(.+?))}', self.filter_string)
@@ -107,23 +110,24 @@ def resolve_filter(filter_, commands=None):
     return filter_
 
 
-def repr_filter(filter_):
+def repr_filter(self, filter_):
     if isinstance(filter_, AndFilter):
         if isinstance(filter_.base, OrFilter):
             if isinstance(filter_.other, OrFilter):
-                return f'({repr_filter(filter_.base)}) {{filter_and}} ({repr_filter(filter_.other)})'
-            return f'({repr_filter(filter_.base)}) {{filter_and}} {repr_filter(filter_.other)}'
+                return f'({repr_filter(self, filter_.base)}) {{filter_and}} ({repr_filter(self, filter_.other)})'
+            return f'({repr_filter(self, filter_.base)}) {{filter_and}} {repr_filter(self, filter_.other)}'
         if isinstance(filter_.other, OrFilter):
-            return f'{repr_filter(filter_.base)} {{filter_and}} ({repr_filter(filter_.other)})'
-        return f'{repr_filter(filter_.base)} {{filter_and}} {repr_filter(filter_.other)}'
+            return f'{repr_filter(self, filter_.base)} {{filter_and}} ({repr_filter(self, filter_.other)})'
+        return f'{repr_filter(self, filter_.base)} {{filter_and}} {repr_filter(self, filter_.other)}'
     if isinstance(filter_, OrFilter):
-        return f'{repr_filter(filter_.base)} {{filter_or}} {repr_filter(filter_.other)}'
+        return f'{repr_filter(self, filter_.base)} {{filter_or}} {repr_filter(self, filter_.other)}'
     if isinstance(filter_, InvertFilter):
         if isinstance(filter_.base, (AndFilter, OrFilter)):
-            return '{filter_not} (' + repr_filter(filter_.base) + ')'
-        return '{filter_not} ' + repr_filter(filter_.base)
+            return '{{filter_not}} (' + repr_filter(self, filter_.base) + ')'
+        return '{{filter_not}} ' + repr_filter(self, filter_.base)
 
     if filter_.__class__.__name__ == 'CommandFilter':
+        filter_.client = self.module.app
         commands = []
         for p, c in combine(filter_.prefixes, filter_.commands):
             commands.append(p + c)
@@ -140,12 +144,14 @@ def repr_filter(filter_):
         flags_string = []
         for i in range(len(flags)):
             if flags[i] == '1':
-                flags_string.append('{' + re_flags[2 ** i] + '}')
+                flags_string.append('{filter_re_flag_' + re_flags[i] + '}')
+        if not flags_string:
+            flags_string = ['{filter_re_no_flag}']
 
-        flags_string = ' {and_string} '.join(flags_string)
+        flags_string = ', '.join(flags_string)
         return '{{filter_regex}} {regular_expression} ({{filter_regex_flags}} {flags})'.format(
-            regular_expression=f'<code>{repr(pattern)}</code>',
-            flags=flags_string  # TODO show flags when debug mode or developer mode is on
+            regular_expression=f'<code>r{repr(pattern)}</code>',
+            flags=flags_string
         )
 
     if isinstance(filter_, filters.user):
@@ -170,14 +176,3 @@ def repr_filter(filter_):
         return f"{{__doc__={filter_.__doc__}}}"
 
     return html.escape(repr(filter_))
-
-
-if __name__ == '__main__':
-    command = Command(0, 0, 0, filters.me & filters.regex('/test', re.I | re.M) | filters.command('test'))
-    print(command.filter_string)
-    print(list(map(repr_filter, command.command_filters)))
-
-    print(re.search('h{3}', 'gugugughhhu', re.I))
-    import pprint
-
-    pprint.pprint({'filter_' + i: '' for i in all_filters}, indent=4)

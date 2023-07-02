@@ -8,7 +8,7 @@ import shutil
 from pyrogram import Client, filters
 
 from utils import bot_utils
-from core.bot_types import filters as custom_filters
+from core.bot_types import bot_filters as custom_filters
 
 log = logging.getLogger(__name__)
 

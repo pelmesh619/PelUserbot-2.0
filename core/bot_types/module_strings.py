@@ -1,5 +1,6 @@
 import logging
 import json
+import os
 import re
 import time
 
@@ -30,7 +31,6 @@ class ModuleStrings(BotObject):
         self._module = None
         self.module_id = ''
         self.last_reloading = 0
-        self.reload_string()
         self.lang_code = None
 
     def get_strings_by_lang_code(self, lang_code):
@@ -48,7 +48,12 @@ class ModuleStrings(BotObject):
     def reload_string(self):
         if self.strings_filename and self.do_reloading:
             try:
-                file = json.load(open(self.strings_filename, encoding='utf8'))
+                filename = os.path.join(
+                    self._module.app.get_config_parameter('resources_directory'),
+                    'strings',
+                    self.strings_filename,
+                )
+                file = json.load(open(filename, encoding='utf8'))
             except Exception as e:
                 log.error(f'Error raised while strings of module "{self.module_id}" were reloading', exc_info=e)
             else:
@@ -66,9 +71,12 @@ class ModuleStrings(BotObject):
         strings = getattr(self, 'strings', {})
 
         return_string = None
-        replace_string_from_other_languages = self._module.app.get_config_parameter(
-            'replace_string_from_other_languages'
-        )
+        if self._module.app:
+            replace_string_from_other_languages = self._module.app.get_config_parameter(
+                'replace_string_from_other_languages'
+            )
+        else:
+            replace_string_from_other_languages = True
 
         if lang_code not in strings:
             if string_id in strings:
@@ -103,7 +111,10 @@ class ModuleStrings(BotObject):
         if lang_code is None:
             lang_code = self.lang_code
         if lang_code is None:
-            lang_code = self._module.app.lang_code
+            if self._module and self._module.app:
+                lang_code = self._module.app.lang_code
+            else:
+                lang_code = 'ru'
 
         try:
             string = self.find_string(string_id, lang_code=lang_code)
@@ -115,6 +126,12 @@ class ModuleStrings(BotObject):
                 string = e.args[0]
 
         if isinstance(string, str):
+            if self._module.app:
+                format_kwargs['_cmd_pref'] = self._module.app.get_command_prefix()
+            for i in re.finditer('{(time_to_string\((.+)\))}', string):
+                key = i.group(2)
+                if key in format_kwargs:
+                    format_kwargs[i.group(1)] = self.time_to_string(format_kwargs[key])
             string = format_text(string, **format_kwargs)
 
         return string
@@ -156,6 +173,11 @@ class ModuleStrings(BotObject):
                               )
 
         if string is not None:
+            format_kwargs['_cmd_pref'] = self._module.app.get_command_prefix()
+            for i in re.finditer('{(time_to_string\((.+)\))}', string):
+                key = i.group(2)
+                if key in format_kwargs:
+                    format_kwargs[i.group(1)] = self.time_to_string(format_kwargs[key])
             return format_text(string, **format_kwargs)
 
         return f'[string form "{string_id}" via value "{value}" was ' \

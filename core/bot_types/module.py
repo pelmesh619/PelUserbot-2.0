@@ -4,6 +4,7 @@ import os
 import re
 import json
 import time
+from collections import OrderedDict
 from typing import Union, List, Tuple
 
 from pyrogram.filters import Filter
@@ -15,6 +16,7 @@ from .author import Author
 from .module_strings import ModuleStrings
 from .module_database import ModuleDatabase
 from .command import Command
+from .log_formatter import LocalizedFormatter
 
 from utils import text_utils, time_utils
 
@@ -69,11 +71,14 @@ class Module(BotObject):
         self.default_config = {}
         self.python_module = None
         self.commands = []
+        self.logger = logging.getLogger('')
+        self.error_handlers = OrderedDict()
 
-    def init(self, app, module_id, added_handlers, python_module):
+    def init(self, app, module_id, added_handlers, python_module, error_handlers=()):
         self.app = app
         self.module_id = module_id
         self.strings.module_id = self.module_id
+        self.strings.reload_string()
         self.handlers = added_handlers
         self.installation_date = time.time()
         self.default_config = copy.deepcopy(getattr(self, 'config', {}))
@@ -97,6 +102,16 @@ class Module(BotObject):
 
         for state in self.states:
             state.module = self
+
+        self.logger = logging.getLogger(self.app.name + '.' + self.module_id)
+        handler = logging.StreamHandler()
+        formatter = LocalizedFormatter(self, '%(levelname)s %(message)s')
+        handler.setFormatter(formatter)
+        self.logger.setLevel(10)
+        self.logger.addHandler(handler)
+
+        for handler, group in error_handlers:
+            self.add_error_handler(handler, group)
 
     def full_name(self):
         """
@@ -145,6 +160,9 @@ class Module(BotObject):
         except Exception as e:
             log.error(f'While loading config of module {self.module_id} error is raised', exc_info=e)
         else:
+            for i in self.default_config:
+                if i not in config:
+                    config[i] = self.default_config[i]
             self.config = config
 
     def save_config(self):
@@ -164,7 +182,7 @@ class Module(BotObject):
                 docs = func.__doc__
                 handler_type = type(handler).__name__
                 command = Command(func, handler, group, handler.filters, documentation=docs, handler_type=handler_type)
-                command.module = self
+                command.init(self)
                 self.commands.append(command)
 
     def decode_string(self, attr):
@@ -296,6 +314,13 @@ class Module(BotObject):
         for state in self.states:
             if state.state_id == state_id:
                 return state
+
+    def add_error_handler(self, handler, group=0):
+        if group not in self.error_handlers:
+            self.error_handlers[group] = []
+            self.error_handlers = OrderedDict(sorted(self.error_handlers.items()))
+
+        self.error_handlers[group].append(handler)
 
 
 def wrapper(func, lang_code, app=None):
