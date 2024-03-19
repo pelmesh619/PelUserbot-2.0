@@ -3,7 +3,8 @@ import logging
 import importlib
 import re
 
-from core import Module, Author, ModuleDatabase
+from core.bot_types.module import Module
+from core.bot_types.author import Author
 
 
 module_info = Module(
@@ -14,7 +15,7 @@ module_info = Module(
     version='v0.1.0-alpha',
     release_date='01-01-1970',
     strings={},
-    strings_source_filename=os.path.join('resources', 'strings', 'core_strings.json'),
+    strings_source_filename='core_strings.json',
     config={},
     requirements=[],
     changelog={

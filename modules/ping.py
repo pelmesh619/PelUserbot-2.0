@@ -74,5 +74,3 @@ async def ping_handler(app, message):
         respond += module.get_string('ping_in_saved_messages', ping=time_delta_in_saved_messages)
         await message.edit(respond)
 
-    respond += '\n' + module.get_config_parameter('code')
-    await message.edit(respond)

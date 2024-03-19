@@ -6,5 +6,8 @@
 /cache
 __pycache__
 
-config2.json
+config*.json
 main_test.py
+
+resources/block
+logs/

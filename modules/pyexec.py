@@ -1,4 +1,3 @@
-import asyncio
 import io
 import re
 import time
@@ -7,11 +6,11 @@ import html
 import logging
 import traceback
 
-import pyrogram.enums
 from pyrogram import Client, filters
-from core import Module, Author
+from core import Module, Author, bot_filters
 
 import utils
+from utils import bot_utils, format_traceback
 
 log = logging.getLogger(__name__)
 
@@ -38,17 +37,33 @@ module = Module(
             'code_edited_filter': 'с измененным кодом внутри старого сообщения',
             'define_right_message_docs': 'являющиеся ответом на сообщение, ждущее ввод',
             # TODO docs for handlers
+            'code_and_output_regex': 'Код:\n(.*)\nВывод:\n.*',
+            'code_and_return_regex': 'Код:\n(.*)\nВозвращено: .*',
+            'code_and_error_regex': 'Код:\n(.*)\nВозникла ошибка:\n.*',
+            'code_and_interpretation_error_regex': 'Код:\n(.*)\nВозникла ошибка интерпретации:\n.*',
+            'code_and_time_spent_regex': 'Код:\n(.*)\nПотрачено времени: .* с',
         },
         'en': {
+            'pyexec_module_name': 'Executor Pyexec',
+            'description': 'Executes Python code. Supports input function and error\'s traceback.',
+
+            'code_edited_filter': 'with edited code inside old message',
+            # 'define_right_message_docs': 'являющиеся ответом на сообщение, ждущее ввод',
             'code': '<b>Code</b>:\n<pre>{code}</pre>',
             'output': '<b>Output</b>:\n<code>{output}</code>',
             'no_args': '<b>Enter in command code or reply command to message to execute Python code</b>',
             'return': '<b>Returned</b>: <code>{result}</code>',
             'error': '<b>Error raised</b>:\n<code>{error}</code>',
+            'interpretation_error': '<b>Interpretation error raised</b>:\n<code>{error}</code>',
             'time_spent': '<b>Time spent</b>: {delta} sec',
             'time_spent_without_input': '<b>Time spent without getting input</b>: {delta} sec',
             'waiting_input': 'Waiting user\'s input...',
             'program_needs_input': 'Program needs input (reply to this message)\n\n<code>{prompt}</code>',
+            'code_and_output_regex': 'Код:\n(.*)\nВывод:\n.*',
+            'code_and_return_regex': 'Код:\n(.*)\nВозвращено: .*',
+            'code_and_error_regex': 'Код:\n(.*)\nВозникла ошибка:\n.*',
+            'code_and_interpretation_error_regex': 'Код:\n(.*)\nВозникла ошибка интерпретации:\n.*',
+            'code_and_time_spent_regex': 'Код:\n(.*)\nПотрачено времени: .* с',
         },
         'ge': {
             'code': '<b>Code</b>:\n<pre>{code}</pre>',
@@ -58,8 +73,6 @@ module = Module(
 
     },
 )
-
-_waiting_input_list = {}
 
 
 class Console:
@@ -72,45 +85,48 @@ class Console:
     @staticmethod
     def write(str_, *_, **__):
         print(str_, end='', file=sys.__stdout__)
-        # print__(str_, end='')
 
     def print(self, *args, sep=' ', end='\n'):
         print(*args, sep=sep, end=end, file=sys.__stdout__)
         self.file += sep.join([str(i) for i in args]) + end
 
-    async def input(self, prompt='', *args, **kwargs):
+    # noinspection PyProtectedMember
+    async def input(self, prompt='', *_, **__):
         self.print(prompt, end='')
 
         current_time = time.time()
         try:
+            new_respond = self.respond
             if self.file:
-                self.respond += '\n\n' + module.get_string('output', output=html.escape(self.file))
-            await self.message.edit(self.respond + '\n\n' + module.get_string('waiting_input'))
-        except Exception:
-            pass
+                new_respond += '\n\n' + module.get_string('output', output=html.escape(self.file))
+            await self.message.edit(new_respond + '\n\n' + module.get_string('waiting_input'))
+        except Exception as e:
+            print(e)
+            # TODO logs
 
         input_respond = module.get_string('program_needs_input', prompt=prompt)
-        input_message = await self.message.reply(input_respond, pyrogram.enums.ParseMode.HTML)
-        key = input_message.chat.id, input_message.id
-        _waiting_input_list[key] = None
+        input_message = await self.message.reply(input_respond)
+        answer = await bot_utils.wait_answer(input_message, filters.text, timeout=30)
 
-        while _waiting_input_list[key] is None:
-            await asyncio.sleep(0.1)
-        input_value = _waiting_input_list[key]
-        del _waiting_input_list[key]
+        if answer is None:
+            await input_message.edit(
+                input_respond + '\n\n' +
+                self.message._client.get_core_string('message_is_outdated')
+            )
+            raise TimeoutError(self.message._client.get_core_string('message_is_outdated'))
+        else:
+            input_value = answer.text
 
-        respond = re.sub(
-            '\n\n' + re.escape(module.get_string('output', output='[specsimb]')).replace('\\[specsimb\\]', '(.*\n*)*'),
-            '', self.respond)
+        new_respond = self.respond
         if not self.file:
-            respond += '\n\n' + module.get_string('output', output=html.escape(self.file + input_value))
+            new_respond += '\n\n' + module.get_string('output', output=html.escape(self.file + input_value))
         self.print(input_value)
         try:
-            await self.message.edit(respond + '\n\n' + module.get_string('waiting_input'))
-        except Exception:
-            pass
+            await self.message.edit(new_respond + '\n\n' + module.get_string('waiting_input'))
+        except Exception as e:
+            print(e)
 
-        await input_message.edit(input_respond + f'<i>{input_value}</i>', pyrogram.enums.ParseMode.HTML)
+        await input_message.edit(input_respond + f'<code>{input_value}</code>')
 
         delta = time.time() - current_time
         self.getting_input_time += delta
@@ -137,7 +153,8 @@ class Result:
             executing_time=0.0,
             error=None,
             error_console=None,
-            interpretation_error=None
+            interpretation_error=None,
+            modified_script=None
     ):
         self.console = console
         self.returned = returned
@@ -146,6 +163,7 @@ class Result:
         self.error = error
         self.error_console = error_console
         self.interpretation_error = interpretation_error
+        self.modified_script = modified_script
 
 
 def add_to_global(func):
@@ -153,6 +171,7 @@ def add_to_global(func):
     return func
 
 
+# noinspection PyBroadException
 async def asyncexec(code, **kwargs):
     code = f"async def __ex():\n    " + code.replace("\n", "\n    ")
     code = code.replace('input(', 'await input(')
@@ -178,6 +197,7 @@ async def asyncexec(code, **kwargs):
         try:
             exec(return_code, global_vars)
             print(return_code, file=sys.__stdout__)
+            code = return_code
         except Exception:
             pass
         else:
@@ -203,7 +223,7 @@ async def asyncexec(code, **kwargs):
     executing_time = time.time() - current_time
     if error is not None:
         traceback.print_exception(*error, file=error_console)
-    result = Result(console, returned, bool(return_match), executing_time, error, error_console)
+    result = Result(console, returned, bool(return_match), executing_time, error, error_console, modified_script=code)
 
     return result
 
@@ -217,32 +237,23 @@ def kwargs_to_str(dict_, **kwargs):
 
     return ', '.join(args)
 
-# TODO fix this
+
 def edit_code_filter(_, __, message):
-    regex = re.escape(module.get_string('code', code='[specsimb]')).replace('\\[specsimb\\]', '(.*?)')
-    possible_results = [
-        '(' + '\n*' + re.escape(module.get_string('output', output='[specsimb]')).replace('\\[specsimb\\]',
-                                                                                          '(.*)') + ')',
-        '(' + '\n*' + re.escape(module.get_string('return', result='[specsimb]')).replace('\\[specsimb\\]',
-                                                                                          '(.*)') + ')',
-        '(' + '\n*' + re.escape(module.get_string('error', error='[specsimb]')).replace('\\[specsimb\\]', '(.*)') + ')',
-        '(' + '\n*' + re.escape(module.get_string('interpretation_error', error='[specsimb]')).replace('\\[specsimb\\]',
-                                                                                                       '(.*)') + ')',
-        '(' + '\n*' + re.escape(module.get_string('time_spent', delta='[specsimb]')).replace('\\[specsimb\\]',
-                                                                                             '(.*)') + ')',
-    ]
-    regex += '(' + '|'.join(possible_results) + ')'
-    regex = regex.replace('\\\n', '\n').replace('\\ ', ' ')
-    match = re.search(utils.remove_html_tags(regex), message.text, re.S)
+    possible_results = ['output', 'return', 'error', 'interpretation_error', 'time_spent']
+    possible_results = ['code_and_' + i + '_regex' for i in possible_results]
+    regexes = [message.get_string(i) for i in possible_results]
 
-    if match:
-        script = match.group(1)
+    for r in regexes:
+        match = re.search(r, message.text, re.S)
 
-        if not script:
-            return
+        if match:
+            script = match.group(1)
 
-        message.script = script
-        return True
+            if not script:
+                return
+
+            message.script = script
+            return True
 
 
 code_edited_filter = filters.create(
@@ -251,10 +262,12 @@ code_edited_filter = filters.create(
 )
 
 
-#@Client.on_edited_message(filters.me & code_edited_filter)
+# test feature
+# @Client.on_edited_message(filters.me & bot_filters.i_am_user & code_edited_filter)
 @Client.on_message(filters.me & filters.command('exec'))
 async def execute_handler(peluserbot, message):
     script = getattr(message, 'script', None) or ' '.join(message.text.split(' ')[1:])
+    is_edited = hasattr(message, 'script')
     exec_msg = message
 
     if not script:
@@ -274,7 +287,10 @@ async def execute_handler(peluserbot, message):
 
     respond = module.get_string('code', code=html.escape(script))
 
-    bot_message = await message.reply(respond, parse_mode=pyrogram.enums.ParseMode.HTML)
+    if not is_edited:
+        bot_message = await message.reply(respond)
+    else:
+        bot_message = await message.edit(respond)
 
     reply = (await peluserbot.get_messages(exec_msg.chat.id, exec_msg.id, replies=2)).reply_to_message
 
@@ -288,23 +304,26 @@ async def execute_handler(peluserbot, message):
         'chat': exec_msg.chat,
         'reply': reply,
         'reply_user': getattr(reply, 'from_user', None),
-        '__message__': message,
+        '_message': message,
     }
 
     result = await asyncexec(script, **kwargs)
     executing_time = result.executing_time
     output = result.console.file.strip('\n')
     if result.interpretation_error:
-        exception_frames = reformat_exception_frames(result.error_console.file, script)
+        exception_frames = format_traceback(
+            result.interpretation_error,
+            peluserbot,
+            result.modified_script,
+            result.interpretation_error[1].args[1]
+        )
         respond += '\n\n' + module.get_string('interpretation_error', error=html.escape(exception_frames))
     else:
 
         if output:
-            print(repr(output))
             respond += '\n\n' + module.get_string('output', output=html.escape(output))
         if result.error:
-            exception_frames = reformat_exception_frames(result.error_console.file, script)
-            print(exception_frames)
+            exception_frames = format_traceback(result.error, peluserbot, result.modified_script)
             respond += '\n\n' + module.get_string('error', error=html.escape(exception_frames))
         else:
             respond += '\n'
@@ -320,57 +339,11 @@ async def execute_handler(peluserbot, message):
     if len(respond) >= 4096:
         text = utils.split_string(respond)
 
-        await bot_message.edit_text(text=text[0] + '</code>', parse_mode=pyrogram.enums.ParseMode.HTML)
+        await bot_message.edit_text(text=text[0] + '</code>')
 
         reply_to = bot_message
         for i in range(1, len(text)):
-            reply_to = await reply_to.reply_text(text='<code>' + text[i] + '</code>',
-                                                 parse_mode=pyrogram.enums.ParseMode.HTML)
+            reply_to = await reply_to.reply_text(text='<code>' + text[i] + '</code>')
 
     else:
-        await bot_message.edit_text(respond, parse_mode=pyrogram.enums.ParseMode.HTML)
-
-
-def define_right_message(_, __, msg):
-    try:
-        global _waiting_input_list
-
-        reply_msg = msg.reply_to_message
-
-        chat = getattr(reply_msg.chat, 'id', reply_msg.from_user.id)
-        key = (chat, reply_msg.id)
-        return key in _waiting_input_list and _waiting_input_list[key] is None
-    except Exception:
-        pass
-    return False
-
-
-@Client.on_message(filters.text & filters.reply &
-                   filters.create(func=define_right_message, __doc__='string_id=define_right_message_docs'))
-async def getting_input(_, message):
-    reply_msg = message.reply_to_message
-    chat = getattr(reply_msg.chat, 'id', reply_msg.from_user.id)
-    key = (chat, reply_msg.id)
-    _waiting_input_list[key] = message.text
-
-
-def reformat_exception_frames(exception_frames, code):
-    exception_frames = exception_frames.strip('\n').split('\n')
-    start_slice = 1
-    end_slice = 1
-    while end_slice < len(exception_frames):
-        if re.search(r'( {2}File \"<string>\", line (\d+).*)', exception_frames[end_slice]):
-            del exception_frames[start_slice:end_slice]
-            break
-        end_slice += 1
-    exception_frames = '\n'.join(exception_frames)
-    for match in re.finditer(r'( {2}File \"<string>\", line (\d+), in .+\n)', exception_frames):
-        line = code.split('\n')[int(match.group(2)) - 2].strip(' ')
-        exception_frames = re.sub(match.group(1), f'\g<0>    {line}\n', exception_frames)
-
-    exception_frames = re.sub(r'( {2}File \".+?\\).+?\\.+?(\\.+", line (\d+), in .+\n)', '\g<1>...\g<2>',
-                              exception_frames)
-    return exception_frames
-
-
-
+        await bot_message.edit_text(respond)

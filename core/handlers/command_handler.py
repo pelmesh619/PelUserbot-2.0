@@ -3,7 +3,7 @@ import re
 
 from pyrogram import Client, filters
 
-from core.bot_types import Module
+from core.bot_types.module import Module
 
 this_module = Module('core')
 

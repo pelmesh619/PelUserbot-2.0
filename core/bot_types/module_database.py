@@ -8,7 +8,7 @@ from .bot_object import BotObject
 
 class ModuleDatabase(BotObject):
     attributes = [
-        Attribute('schema', str)
+        Attribute('schema', str, '')
     ]
     schema: str
     module_id: str
@@ -36,6 +36,7 @@ class ModuleDatabase(BotObject):
             cur.executescript(sql)
             self.connection.commit()
         except Exception as e:
+            print(repr(e))
             logging.error(f'Error while executing `{sql}` in database of module `{self.module_id}`', exc_info=e)
             cur.close()
             return e
@@ -48,11 +49,13 @@ class ModuleDatabase(BotObject):
         try:
             cur.execute(sql)
         except Exception as e:
+            print(repr(e))
             logging.error(f'Error while executing `{sql}` in database of module `{self.module_id}`', exc_info=e)
             cur.close()
             return e
 
         result = cur.fetchall()
+        self.connection.commit()
         cur.close()
         return result
 

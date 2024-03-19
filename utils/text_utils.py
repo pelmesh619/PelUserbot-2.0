@@ -1,4 +1,5 @@
 import re
+import traceback
 
 import pyrogram.enums
 
@@ -79,3 +80,43 @@ def remove_html_tags(string):
     string = re.sub(r'<\/?\w+?.*?>', '', string)
 
     return string
+
+
+def format_traceback(exc, app, script_string='', last_frame=None):
+    traceback_frames = []
+    traceback_info = traceback.TracebackException(*exc)
+    for frame in traceback_info.stack:
+        new_filename = re.sub(r'(.+?[/\\]).+([/\\].+?[/\\].+?)', r'\g<1>...\g<2>', frame.filename)
+        code_line = frame.line
+        if script_string and new_filename == '<string>':
+            code_line = script_string.split('\n')[frame.lineno - 1].strip(' ')
+        traceback_frames.append(
+            app.get_core_string(
+                'traceback_frame',
+                line=frame.lineno,
+                filename=new_filename,
+                name=frame.name,
+                code=code_line
+            )
+        )
+
+    error_args = exc[1].args
+    if last_frame:
+        new_filename = re.sub(r'(.+?[/\\]).+([/\\].+?[/\\].+?)', r'\g<1>...\g<2>', last_frame[0])
+        traceback_frames.append(
+            app.get_core_string(
+                'traceback_frame_without_name',
+                line=last_frame[1],
+                filename=new_filename,
+                code=last_frame[3]
+            ) + ' ' * (last_frame[2] - 1) + '^'
+        )
+        error_args = error_args[:1]
+
+    return app.get_core_string(
+        'traceback_template',
+        traceback='\n'.join(traceback_frames),
+        error=exc[0].__name__,
+        error_text='; '.join([repr(i) for i in error_args])
+        if error_args else app.get_core_string('traceback_no_detail')
+    )

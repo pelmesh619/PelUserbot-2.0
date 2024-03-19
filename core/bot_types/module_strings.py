@@ -1,5 +1,7 @@
 import logging
 import json
+import os
+import random
 import re
 import time
 
@@ -30,7 +32,6 @@ class ModuleStrings(BotObject):
         self._module = None
         self.module_id = ''
         self.last_reloading = 0
-        self.reload_string()
         self.lang_code = None
 
     def get_strings_by_lang_code(self, lang_code):
@@ -48,17 +49,25 @@ class ModuleStrings(BotObject):
     def reload_string(self):
         if self.strings_filename and self.do_reloading:
             try:
-                file = json.load(open(self.strings_filename, encoding='utf8'))
+                filename = os.path.join(
+                    self._module.app.get_config_parameter('resources_directory'),
+                    'strings',
+                    self.strings_filename,
+                )
+                file = json.load(open(filename, encoding='utf8'))
             except Exception as e:
                 log.error(f'Error raised while strings of module "{self.module_id}" were reloading', exc_info=e)
             else:
                 self.strings = file
             self.last_reloading = time.time()
 
-    def find_string(self, string_id: str, lang_code: str):
+    def find_string(self, string_id: str, lang_code: str, route=None):
         if self._module:
             if self._module.app:
                 self._module.app.get_string_calls += 1
+
+        if route and self.strings_filename:
+            pass
 
         if self.last_reloading + self.STRINGS_RELOADING_TIME < time.time():
             self.reload_string()
@@ -66,9 +75,12 @@ class ModuleStrings(BotObject):
         strings = getattr(self, 'strings', {})
 
         return_string = None
-        replace_string_from_other_languages = self._module.app.get_config_parameter(
-            'replace_string_from_other_languages'
-        )
+        if self._module.app:
+            replace_string_from_other_languages = self._module.app.get_config_parameter(
+                'replace_string_from_other_languages'
+            )
+        else:
+            replace_string_from_other_languages = True
 
         if lang_code not in strings:
             if string_id in strings:
@@ -103,10 +115,17 @@ class ModuleStrings(BotObject):
         if lang_code is None:
             lang_code = self.lang_code
         if lang_code is None:
-            lang_code = self._module.app.lang_code
+            if self._module and self._module.app:
+                lang_code = self._module.app.lang_code
+            else:
+                lang_code = 'ru'
+
+        parts = string_id.split('.')
+        route = parts[:-1]
+        string_id = parts[-1]
 
         try:
-            string = self.find_string(string_id, lang_code=lang_code)
+            string = self.find_string(string_id, lang_code=lang_code, route=route)
         except KeyError as e:
             log.warning(e.args[0])
             if default:
@@ -115,6 +134,12 @@ class ModuleStrings(BotObject):
                 string = e.args[0]
 
         if isinstance(string, str):
+            if self._module.app:
+                format_kwargs['_cmd_pref'] = self._module.app.get_command_prefix()
+            for i in re.finditer('{(time_to_string\((.+)\))}', string):
+                key = i.group(2)
+                if key in format_kwargs:
+                    format_kwargs[i.group(1)] = self.time_to_string(format_kwargs[key])
             string = format_text(string, **format_kwargs)
 
         return string
@@ -156,6 +181,11 @@ class ModuleStrings(BotObject):
                               )
 
         if string is not None:
+            format_kwargs['_cmd_pref'] = self._module.app.get_command_prefix()
+            for i in re.finditer('{(time_to_string\((.+)\))}', string):
+                key = i.group(2)
+                if key in format_kwargs:
+                    format_kwargs[i.group(1)] = self.time_to_string(format_kwargs[key])
             return format_text(string, **format_kwargs)
 
         return f'[string form "{string_id}" via value "{value}" was ' \
@@ -241,6 +271,11 @@ class ModuleStrings(BotObject):
 
         return time_utils.date_to_string(time_value, tz, app=self._module.app, lang_code=lang_code)
 
+    def datetime_to_string(self, time_value=None, tz=None, lang_code=None):
+        if lang_code is None:
+            lang_code = self.lang_code
+
+        return time_utils.datetime_to_string(time_value, tz, app=self._module.app, lang_code=lang_code)
     def memory_to_string(self, value, measure=None, round_value=2, lang_code=None):
         if lang_code is None:
             lang_code = self.lang_code
@@ -252,3 +287,23 @@ class ModuleStrings(BotObject):
             app=self._module.app,
             lang_code=lang_code
         )
+
+
+    def choose(self, string_id: str, default=None, lang_code: str = None, **format_kwargs):
+        strings = self.get_string(string_id=string_id, default=default, lang_code=lang_code, **format_kwargs)
+        if isinstance(strings, str):
+            return strings
+        elif not isinstance(strings, list):
+            return strings
+
+        string = random.choice(strings)
+        if isinstance(strings, str):
+            if self._module.app:
+                format_kwargs['_cmd_pref'] = self._module.app.get_command_prefix()
+            for i in re.finditer('{(time_to_string\((.+)\))}', string):
+                key = i.group(2)
+                if key in format_kwargs:
+                    format_kwargs[i.group(1)] = self.time_to_string(format_kwargs[key])
+            string = format_text(string, **format_kwargs)
+
+        return string
