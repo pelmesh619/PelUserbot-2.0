@@ -210,10 +210,7 @@ def exception(
                 flt, client, update
             )
 
-        if not x:
-            return False
-
-        return True
+        return x
 
     return filters.create(
         func,

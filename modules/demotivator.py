@@ -38,7 +38,7 @@ LOBSTER_FONT = requests.get('https://github.com/pelmesh619/fonts/blob/main/Lobst
 TIMESNEWROMAN_FONT = requests.get('https://github.com/pelmesh619/fonts/blob/main/TimesNewRoman.ttf?raw=true').content
 
 
-@Client.on_message(filters.me & filters.reply & filters.command('demot'))
+@Client.on_message(filters.me & filters.reply & filters.command(['demot', 'slavik']))
 async def demotivator_handler(peluserbot, message):
     photo = message.reply_to_message.photo or message.reply_to_message.from_user.photo.big_file_id
 
@@ -52,7 +52,12 @@ async def demotivator_handler(peluserbot, message):
 
     await message.edit_text('🔄<b>Фотожоплю</b>🔄')
 
-    out = await demotivator(photo_path, caption, module.get_config_parameter('photo_size'))
+    if message.command[0] == 'demot':
+        func = demotivator
+    else:
+        func = slavik
+
+    out = await func(photo_path, caption, module.get_config_parameter('photo_size'))
 
     await message.edit_text('🔄<b>Отправляю</b>🔄')
 
@@ -75,13 +80,15 @@ async def demotivator(file, caption, size):
 
     d = ImageDraw.Draw(text_image)
 
-    text_xy = d.multiline_textsize(caption, font=font)
+    text_xy = d.textbbox((0, 0), caption, font=font)
+    text_xy = text_xy[2], text_xy[3]
     text_xy = (size[0] - text_xy[0]) // 2, (size[1] * 0.25 - text_xy[1]) // 2 + int(size[1] * 0.75)
 
     if text_xy[0] < 0:
         caption = '\n'.join(textwrap.wrap(caption, width=40))
 
-    text_xy = d.multiline_textsize(caption, font=font)
+    text_xy = d.textbbox((0, 0), caption, font=font)
+    text_xy = text_xy[2], text_xy[3]
     text_xy = (size[0] - text_xy[0]) // 2, (size[1] * 0.25 - text_xy[1]) // 2 + int(size[1] * 0.75)
 
     with pilmoji.Pilmoji(text_image) as pilmoji_:
@@ -118,14 +125,15 @@ async def demotivator(file, caption, size):
 
 
 
-async def slavik(file, caption):
+async def slavik(file, caption, size):
     image = Image.open(file)
     d = ImageDraw.Draw(image)
 
     i = image.size[1] // 12
     while i > 0:
         font = ImageFont.truetype(io.BytesIO(LOBSTER_FONT), i)
-        text_xy = d.multiline_textsize(caption, font=font)
+        text_xy = d.textbbox((0, 0), caption, font=font)
+        text_xy = text_xy[2], text_xy[3]
 
         if text_xy[0] < image.size[0] * .9:
             break
@@ -144,39 +152,6 @@ async def slavik(file, caption):
     return out
 
 
-async def slavik_gif(path, caption):
-    gif = Image.open(path)
-    size = gif.size
 
-    images = []
-
-    for i in range(gif.n_frames):
-        gif.seek(i)
-        image = gif.convert('RGBA')
-
-        d = ImageDraw.Draw(image)
-        if i == 0:
-            j = size[1] // 10
-            while j > 0:
-                font = ImageFont.truetype(io.BytesIO(LOBSTER_FONT), j)
-                text_xy = d.multiline_textsize(caption, font=font)
-
-                if text_xy[0] < size[0] * .9:
-                    break
-                j -= 2
-
-            text_xy = (size[0] - text_xy[0]) // 2, size[1] - size[1] // 7
-        d.multiline_text((text_xy[0] + 1, text_xy[1] + 1), caption, font=font, fill=(0, 0, 0), align='center')
-        d.multiline_text(text_xy, caption, font=font, fill=(255, 255, 255), align='center')
-
-        images.append(image)
-
-    out = io.BytesIO()
-    out.name = 'slavik.gif'
-    images[0].save(out, 'GIF', save_all=True, append_images=images[1:], optimize=True)
-    out.seek(0)
-
-    print('done')
-    return out
 
 

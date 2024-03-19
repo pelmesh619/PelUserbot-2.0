@@ -124,10 +124,16 @@ async def purge(app, message):
                     if msg.media.value not in stats:
                         stats[msg.media.value] = 0
                     stats[msg.media.value] += 1
-                try:
-                    await msg.delete()
-                except FloodWait:
-                    await asyncio.sleep(3)
+                while True:
+                    try:
+                        result = await msg.delete()
+                    except FloodWait:
+                        await asyncio.sleep(3)
+                    else:
+                        break
+
+                if not result:
+                    continue
                 count += 1
 
         except Exception:

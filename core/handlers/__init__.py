@@ -3,7 +3,8 @@ import logging
 import importlib
 import re
 
-from core import Module, Author, ModuleDatabase
+from core.bot_types.module import Module
+from core.bot_types.author import Author
 
 
 module_info = Module(

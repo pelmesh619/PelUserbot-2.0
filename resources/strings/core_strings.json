@@ -29,12 +29,25 @@
             "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "работы",
             "lambda x: True": "работ"
         },
+        "worker_form": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "работник",
+            "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "работника",
+            "lambda x: True": "работников"
+        },
         "added_form": {
             "lambda x: x % 10 == 1 and x % 100 != 11": "добавлен",
             "lambda x: True": "добавлено"
         },
         "removed_form": {
             "lambda x: x % 10 == 1 and x % 100 != 11": "удален",
+            "lambda x: True": "удалено"
+        },
+        "stopped_form": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "остановлен",
+            "lambda x: True": "остановлены"
+        },
+        "removed_feminine_form": {
+            "lambda x: x % 10 == 1 and x % 100 != 11": "удалена",
             "lambda x: True": "удалено"
         },
         "reloaded_form": {
@@ -65,6 +78,11 @@
             "lambda x: x % 10 == 1 and x % 100 != 11": "секунда",
             "lambda x: 1 < x % 10 < 5 and not (11 < x % 100 < 15)": "секунды",
             "lambda x: True": "секунд"
+        },
+        "second_ago_form": {
+            "lambda x: int(x) % 10 == 1 and int(x) % 100 != 11": "секунду назад",
+            "lambda x: 1 < int(x) % 10 < 5 and not (11 < int(x) % 100 < 15)": "секунды назад",
+            "lambda x: True": "секунд назад"
         },
         "date_template": "{day}{suffix} {month}, {day_week}, {year} год",
         "datetime_template": "{hours}:{minutes}:{seconds} (UTC{timezone}), {day}{suffix} {month}, {day_week}, {year} год",
@@ -143,7 +161,7 @@
             "Модуль {module_name} не имеет обработчика {command_name}. Используйте команду <code>/commands {module_id}</code>, чтобы посмотреть обработчики модуля",
         "command_enter_command": "Введите имя обработчика или его номер, чтобы посмотреть информацию о нем. Например: <code>{_cmd_pref}command test 1</code>, <code>{_cmd_pref}command test test_handler</code>",
 
-        "commands_enter_module_name": "Введите идентификатор модуля после команды, чтобы посмотреть информацию о нем. Например: <code>{_cmd_pref}module test</code>",
+        "commands_enter_module_name": "Введите идентификатор модуля после команды, чтобы посмотреть информацию о нем. Например: <code>{_cmd_pref}commands test</code>",
         "commands_module_not_found": "Модуль {module_name} не был найден. Вы можете посмотреть список установленных модулей через команду <code>{_cmd_pref}modules</code>",
         "commands_module_does_not_have_commands": "Модуль {module_name} не имеет обработчиков",
         "commands_template": "Обработчики модуля {module_name}:\n\n{commands}Всего {handlers_count} {handlers_form}",
@@ -182,6 +200,9 @@
         "restarting": "Перезагрузка...",
         "restart_succeed": "Перезагрузка выполнена успешно",
         "message_is_outdated": "Сообщение устарело",
+        "restart_confirm_button": "Подтвердить",
+        "restart_cancel_button": "Отмена",
+
 
         "modules_template": "Список модулей:\n\n{modules}\nВсего {modules_count} {module_form}",
         "module_short_info": "* {module_name}, {handlers_count} {handler_form}{description} (<code>{_cmd_pref}module {module_id}</code>)\n",
@@ -213,7 +234,30 @@
         "scheduler_no_docs": "отсутствует",
         "scheduler_there_are_no_jobs": "<b>Планировщик задач</b>. Работы не заданы",
 
+        "remove_jobs_there_are_no_jobs": "В планировщике задач не задано работ",
+        "remove_jobs_all_jobs_are_removed": "Планировщик задач очищен: {jobs} {job_form} {removed_form}",
+
+        "blacklist_user_was_removed": "✅Пользователь {mention} был убран из черного списка бота, теперь бот будет реагировать на его запросы.\n\nЧтобы добавить пользователя в черный список, ответьте на любое его сообщение командой <code>{_cmd_pref}blacklist</code>",
+        "blacklist_user_was_added": "❌Пользователь {mention} был добавлен в черный список бота, бот больше не будет реагировать на его запросы.\n\nЧтобы убрать пользователя из черного списка, ответьте на любое его сообщение командой <code>{_cmd_pref}blacklist</code>",
+        "blacklist_chat_was_removed": "✅Чат {mention} был убран из черного списка бота, теперь бот будет реагировать на запросы в этом чате.\n\nЧтобы добавить чат в черный список, отправьте в этом чате команду <code>{_cmd_pref}blacklist</code>",
+        "blacklist_chat_was_added": "❌Чат {mention} был добавлен в черный список бота, бот больше не будет реагировать на запросы в этом чате.\n\nЧтобы убрать чат из черного списка, отправьте в этом чате команду <code>{_cmd_pref}blacklist</code>",
+        "blacklist_sender_chat_was_removed": "",
+        "blacklist_sender_chat_was_added": "",
+
         "wait_answer_filter_description": "Фильтрует сообщения, который являются ответом на сообщение, которое ждет ответа",
+
+        "task_manager": "Диспетчер задач:\n\n{processes}\n\nВсего работников обработчиков: {workers}",
+        "process_info": "Работник обработчиков №{num}:\n  * Обработчик - <code>{handler_name}</code>\n  * Модуль - {module_name}\n  * Запущен - {seconds} {second_form}\n  * Обновление - сообщение из чата <i>{chat_name}</i>",
+
+        "process_killed": "Работник обработчиков №{num} с работающим обработчиком <code>{handler}</code> принудительно остановлен и перезапущен",
+        "process_kill_error": "Произошла ошибка при принудительной остановке работника обработчиков №{num} с работающим обработчиком <code>{handler}</code>: {error}",
+        "process_was_not_running": "Работник обработчиков №{num} не запускает никаких обработчиков",
+        "process_was_not_found": "Работник обработчиков c запущенным обработчиком <b>{handler}</b> не найден",
+        "kill_enter_to_kill": "Введите номер работника или имя обработчика, чтобы принудительно остановить работника.",
+
+        "all_processes_kill_error": "При принудительной остановке все работников произошла ошибка: {error}",
+        "all_processes_was_killed": "{worker_count} {worker_form} принудительно {stopped_form}, все работники перезапущены",
+
 
         "filter_and": "И",
         "filter_or": "ИЛИ",
@@ -438,8 +482,7 @@
             "Module {module_id} was not found. You can see the list of installed modules via command <code>{_cmd_pref}modules</code>\nAlso enter handler or its number after module id to see information about it",
         "command_enter_module_name": "Enter module id and handler or its number after command to see information about handler. \nFor example: <code>{_cmd_pref}command test 1</code>, <code>{_cmd_pref}command test test_handler</code>",
         "command_command_not_found_by_index": "Module {module_name} has {count_of_handlers} {handler_form}. Use command <code>{_cmd_pref}commands {module_id}</code> to see module's handlers",
-        "command_command_not_found_by_command":
-            "Module {module_name} has not handler {command_name}. Use command <code>{_cmd_pref}commands {module_id}</code> to see module's handlers",
+        "command_command_not_found_by_command": "Module {module_name} has not handler {command_name}. Use command <code>{_cmd_pref}commands {module_id}</code> to see module's handlers",
         "command_enter_command": "Enter handler or its number after module id to see information about it. For example: <code>{_cmd_pref}command test 1</code>, <code>{_cmd_pref}command test test_handler</code>",
 
         "commands_enter_module_name": "Enter module id after command to see information about it. For example: <code>{_cmd_pref}commands test</code>",
@@ -447,7 +490,9 @@
         "commands_module_does_not_have_commands": "Module {module_name} has not handlers",
         "commands_template": "Handlers of module {module_name}:\n\n{commands}Total is {handlers_count} {handlers_form}",
         "short_command_template": "{num}. <code>{handler}</code> - {handler_type}: {filter_string}{docs} (<code>{_cmd_pref}command {module_id} {handler}</code>)",
+        
 
+        
         "filter_all": "any",
         "filter_animation": "with animation (GIF)",
         "filter_audio": "with audio",

@@ -21,10 +21,31 @@
     "resources_directory": "resources",
     "downloads_directory": "downloads",
     "database_directory": "database",
+    "logs_directory": "logs",
     "will_error_message_send": true,
     "lang_code": "ru",
     "message_prefix": "[BOT] ",
     "command_prefixes": [
         "/"
+    ],
+    "chat_blacklist": [
+
+    ],
+    "sender_chat_blacklist": [
+
+    ],
+    "user_blacklist": [
+
+    ],
+    "ignore_posts_in_channels": true,
+    "chat_whitelist": [
+
+    ],
+    "sender_chat_whitelist": [
+
+    ],
+    "user_whitelist": [
+
     ]
+
 }

@@ -26,6 +26,7 @@ from .config_manager import ConfigManager
 from .module_manager import ModuleManager
 from core.bot_types.peldispatcher import Peldispatcher
 from core.bot_types.error_handler import ErrorHandler
+from core.bot_types.database import PostgreSQLDatabase, AsyncPostgreSQLDatabase, DATABASE_TYPES
 
 log = logging.getLogger(__name__)
 
@@ -233,6 +234,15 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
             for k, v in self.DEFAULT_CONFIG.items():
                 if k not in self._config:
                     self._config[k] = v
+
+            if 'database' in self._config:
+                database_config = self._config['database']
+                database_type = database_config['type']
+                if database_type not in DATABASE_TYPES:
+                    log.error(f'Database type {database_type} was not found, database will not be launched')
+                else:
+                    database = DATABASE_TYPES.get(database_type)(self, database_config)
+                    self.database = database
 
         # Creating working directories
         if not os.path.exists(workdir):
@@ -577,14 +587,14 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
             filters=None,
             group: int = 0
     ) -> Callable:
-        """Decorator for handling errors that was raised while executing other handlers.
+        """Decorator for handling errors that were raised while executing other handlers.
 
         This does the same thing as :meth:`~pyrogram.Client.add_handler` using the
         :obj:`~pyrogram.handlers.ErrorHandler`.
 
         Parameters:
             filters (:obj:`~pyrogram.filters`, *optional*):
-                Pass one or more filters to allow only a subset of messages to be passed
+                Pass one or more filters to allow only a subset of exceptions to be passed
                 in your function.
 
             group (``int``, *optional*):
@@ -609,3 +619,18 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
             return func
 
         return decorator
+
+    def get_log_directory(self, route):
+        path = self.get_config_parameter('logs_directory')
+        if not os.path.exists(path):
+            os.mkdir(path)
+
+        path = os.path.join(path, self.name)
+        if not os.path.exists(path):
+            os.mkdir(path)
+
+        path = os.path.join(path, route)
+        if not os.path.exists(path):
+            os.mkdir(path)
+
+        return path

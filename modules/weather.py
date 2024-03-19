@@ -17,12 +17,12 @@ module = Module(
         'api_key': PUBLIC_API_KEY,
         'latitude': 55.75,
         'longitude': 37.5,
-        'units': None,
+        'units': 'metric',
         'lang': 'ru'
     }
 )
 
-API_ENDPOINT = 'https://api.openweathermap.org/data/2.5/onecall'
+WEATHER_API_ENDPOINT = 'https://api.openweathermap.org/data/2.5/onecall'
 GEOCODING_API_ENDPOINT = 'http://api.openweathermap.org/geo/1.0/direct'
 REVERSE_GEOCODING_API_ENDPOINT = 'http://api.openweathermap.org/geo/1.0/reverse'
 TIME_FORMAT = '%H:%M:%S %d.%m'
@@ -75,18 +75,19 @@ def get_city_name(message, lat, lon, default=None):
 
 def get_weather_raw_data(**weather_parameters):
     if not weather_parameters:
+        config = module.get_config()
         weather_parameters = {
-            'appid': PUBLIC_API_KEY,
-            'lat': 50.5519,
-            'lon': 36.574,
-            'units': 'metric',
-            'lang': 'ru'
+            'appid': config['api_key'],
+            'lat': config['latitude'],
+            'lon': config['longitude'],
+            'units': config['units'],
+            'lang': config['lang']
         }
 
     weather_parameters['exclude'] = 'minutely,hourly,daily'
 
     result = requests.get(
-        API_ENDPOINT,
+        WEATHER_API_ENDPOINT,
         params=weather_parameters
     )
 
@@ -196,7 +197,7 @@ async def weather_forecast_handler(_, message):
 
     await message.edit(module.get_string('api_request'))
     result = requests.get(
-        API_ENDPOINT,
+        WEATHER_API_ENDPOINT,
         params={
             'appid': weather_module_config['api_key'],
             'lat': weather_module_config['latitude'],

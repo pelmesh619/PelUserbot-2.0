@@ -262,7 +262,8 @@ code_edited_filter = filters.create(
 )
 
 
-@Client.on_edited_message(filters.me & bot_filters.i_am_user & code_edited_filter)
+# test feature
+# @Client.on_edited_message(filters.me & bot_filters.i_am_user & code_edited_filter)
 @Client.on_message(filters.me & filters.command('exec'))
 async def execute_handler(peluserbot, message):
     script = getattr(message, 'script', None) or ' '.join(message.text.split(' ')[1:])

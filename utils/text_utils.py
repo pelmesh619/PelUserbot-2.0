@@ -86,7 +86,7 @@ def format_traceback(exc, app, script_string='', last_frame=None):
     traceback_frames = []
     traceback_info = traceback.TracebackException(*exc)
     for frame in traceback_info.stack:
-        new_filename = re.sub(r'(.+?[/\\]).+([/\\].+?[/\\].+?)', '\g<1>...\g<2>', frame.filename)
+        new_filename = re.sub(r'(.+?[/\\]).+([/\\].+?[/\\].+?)', r'\g<1>...\g<2>', frame.filename)
         code_line = frame.line
         if script_string and new_filename == '<string>':
             code_line = script_string.split('\n')[frame.lineno - 1].strip(' ')
@@ -102,7 +102,7 @@ def format_traceback(exc, app, script_string='', last_frame=None):
 
     error_args = exc[1].args
     if last_frame:
-        new_filename = re.sub(r'(.+?[/\\]).+([/\\].+?[/\\].+?)', '\g<1>...\g<2>', last_frame[0])
+        new_filename = re.sub(r'(.+?[/\\]).+([/\\].+?[/\\].+?)', r'\g<1>...\g<2>', last_frame[0])
         traceback_frames.append(
             app.get_core_string(
                 'traceback_frame_without_name',
