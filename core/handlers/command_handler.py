@@ -5,7 +5,8 @@ from pyrogram import Client, filters
 
 from core.bot_types.module import Module
 
-this_module = Module('core')
+this_module = Module()
+
 
 
 @Client.on_message(filters.me & this_module.command('command'))

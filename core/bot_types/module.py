@@ -25,7 +25,6 @@ log = logging.Logger(__name__)
 
 class Module(BotObject):
     attributes = [
-        Attribute('module_id', str, None),
         Attribute('name', str, None),
         Attribute('authors', list, []),
         Attribute('description', str, None),
@@ -43,7 +42,7 @@ class Module(BotObject):
         Attribute('states', list, [])
     ]
 
-    module_id: str
+    module_id: str = "undefined"
     name: str
     authors: List[Author]
     description: str
@@ -301,11 +300,14 @@ class Module(BotObject):
             case_sensitive: bool = False,
             separator: str = '#'
     ) -> Filter:
+        async def f(_, client, message):
+            nonlocal commands
+            commands_ = commands if isinstance(commands, (list, tuple)) else [commands]
+            commands_ = [self.module_id + separator + command for command in commands_]
 
-        commands = commands if isinstance(commands, (list, tuple)) else [commands]
-        commands = [self.module_id + separator + command for command in commands]
+            return await filters.command(commands_, prefixes, case_sensitive)(client, message)
 
-        return filters.command(commands, prefixes, case_sensitive)
+        return filters.create(f, "Module Command Filter")
 
     def get_strings_by_lang_code(self, lang_code):
         return self.strings.get_strings_by_lang_code(lang_code)

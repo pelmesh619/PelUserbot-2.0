@@ -40,7 +40,7 @@ def reload_variables():
     for filename in os.listdir(directory):
         filename = str(filename)
         if (filename.endswith('.py') or not re.search(r'\.\w+$', filename)) and not is_var_special(filename[:-3]):
-            #print(filename)
+            # print(filename)
             module_name = re.sub('\.py$', '', filename)
             try:
                 module = importlib.import_module(__name__ + '.' + module_name)
@@ -62,6 +62,9 @@ def reload_variables():
                         module.reload_variables()
                     variables = {k: v for k, v in vars(module).items() if not is_var_special(k)}
                     globals().update(variables)
+                    for i in vars(module).values():
+                        if isinstance(i, Module):
+                            i.module_id = module_info.module_id
 
 
 reload_variables()

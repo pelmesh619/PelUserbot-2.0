@@ -1,11 +1,7 @@
-import asyncio
-import logging
-import time
-
 from pyrogram import Client, filters
-from core import Module, Author, LocalizedFormatter, Peluserbot
+from core import Module, Author, Peluserbot
 
-__version__ = 'v1.2.0-delta'
+__version__ = 'v1.2.0-epsilon'
 
 from core.bot_types import bot_filters
 
@@ -84,92 +80,4 @@ async def error_catcher(_, msg):
     await msg.reply(msg.get_string('runtime_error_is_raised', details=msg.exception.args[0]))
 
 
-@Client.on_message(filters.me & filters.command('tasks'))
-async def tasks_handler(app, msg):
-    for i in app.dispatcher.handler_worker_tasks:
-        try:
-            i.cancel()
-        except Exception as e:
-            print(e)
-    await msg.reply('success')
-    for i in app.dispatcher.handler_worker_tasks:
-        try:
-            i.uncancel()
-        except Exception as e:
-            print(e)
 
-
-@Client.on_message(filters.me & filters.command('tasks2'))
-async def tasks2_handler(app, msg):
-    dp = app.dispatcher
-
-    for i in range(len(dp.handler_worker_tasks)):
-        hw = dp.handler_worker_tasks[i]
-        lock = dp.locks_list[i]
-        print(time.time(), i, 'handler worker deleted', lock)
-
-        try:
-            hw.cancel()
-            del hw
-        except Exception as e:
-            print(e)
-
-    dp.handler_worker_tasks.clear()
-    dp.locks_list.clear()
-    print(dp.handler_worker_tasks, dp.locks_list)
-
-    for i in range(dp.client.workers):
-        dp.locks_list.append(asyncio.Lock())
-
-        task = dp.loop.create_task(dp.handler_worker(dp.locks_list[-1]))
-        print(time.time(), i, 'handler worker ', dp.locks_list[-1], task)
-        dp.handler_worker_tasks.append(task)
-    await msg.reply('success')
-    print(dp.handler_worker_tasks)
-
-
-# @Client.on_message(filters.me & filters.command('taskmgr'))
-async def taskmgr_handler(app, msg):
-    dp = app.dispatcher
-
-    respond = []
-    for i in range(len(dp.handler_worker_tasks)):
-        lock = dp.locks_list[i]
-        if lock.locked():
-            module_name = None
-            if lock.module:
-                module_name = lock.module.full_name()
-            respond.append(
-                msg.get_string(
-                    'process_info',
-                    num=i,
-                    handler_name=lock.handler_name,
-                    module_name=module_name,
-                    seconds=round(time.time() - lock.start_time, 4),
-                    second_form=msg.get_string_form('second_form', round(time.time() - lock.start_time, 4)),
-                    chat_name=lock.update.chat.title or lock.update.chat.first_name,
-                )
-            )
-
-    await msg.reply(
-        msg.get_string('task_manager', processes='\n\n'.join(respond), workers=len(dp.handler_worker_tasks))
-    )
-
-
-
-
-@Client.on_message(filters.me & filters.command('go'))
-async def go_handler(app, msg):
-    for i in range(10):
-        await msg.reply(str(i))
-        await asyncio.sleep(3)
-    await msg.reply('s1')
-
-
-
-
-@Client.on_message(filters.me & filters.command('go2'))
-async def go2_handler(app, msg):
-    await msg.reply('делаю вещи 60 секунд')
-    await asyncio.sleep(60)
-    await msg.reply('сделал вещи')
