@@ -1,10 +1,12 @@
-import asyncio
 import os
-import logging
+import re
 import json
 import time
+import asyncio
+import logging
 from collections import OrderedDict
 from concurrent.futures.thread import ThreadPoolExecutor
+from io import StringIO
 
 import pyrogram
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -16,10 +18,11 @@ from pyrogram import enums, types, raw
 from pyrogram.client import Client, Cache
 from pyrogram.filters import Filter
 from pyrogram.methods import Methods
+from pyrogram.mime_types import mime_types
 from pyrogram.parser import Parser
 from pyrogram.session import Session
 from pyrogram.session.internals import MsgId
-from pyrogram.storage import MemoryStorage, FileStorage
+from pyrogram.storage import MemoryStorage, FileStorage, Storage
 from pyrogram.types import User
 
 from .config_manager import ConfigManager
@@ -59,8 +62,16 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
             Operating System version.
             Defaults to *platform.system() + " " + platform.release()*.
 
+        lang_pack (``str``, *optional*):
+            Name of the language pack used on the client.
+            Defaults to "" (empty string).
+
         lang_code (``str``, *optional*):
             Code of the language used on the client, in ISO 639-1 standard.
+            Defaults to "en".
+
+        system_lang_code (``str``, *optional*):
+            Code of the language used on the system, in ISO 639-1 standard.
             Defaults to "en".
 
         ipv6 (``bool``, *optional*):
@@ -126,6 +137,10 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
             Useful for batch programs that don't need to deal with updates.
             Defaults to False (updates enabled and received).
 
+        skip_updates (``bool``, *optional*):
+            Pass True to skip pending updates that arrived while the client was offline.
+            Defaults to True.
+
         takeout (``bool``, *optional*):
             Pass True to let the client use a takeout session instead of a normal one, implies *no_updates=True*.
             Useful for exporting Telegram data. Methods invoked inside a takeout session (such as get_chat_history,
@@ -144,6 +159,27 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
             Defaults to False, because ``getpass`` (the library used) is known to be problematic in some
             terminal environments.
 
+        max_concurrent_transmissions (``int``, *optional*):
+            Set the maximum amount of concurrent transmissions (uploads & downloads).
+            A value that is too high may result in network related issues.
+            Defaults to 1.
+
+        max_message_cache_size (``int``, *optional*):
+            Set the maximum size of the message cache.
+            Defaults to 10000.
+
+        storage_engine (:obj:`~pyrogram.storage.Storage`, *optional*):
+            Pass an instance of your own implementation of session storage engine.
+            Useful when you want to store your session in databases like Mongo, Redis, etc.
+
+        client_platform (:obj:`~pyrogram.enums.ClientPlatform`, *optional*):
+            The platform where this client is running.
+            Defaults to 'other'
+
+        init_connection_params (:obj:`~pyrogram.raw.base.JSONValue`, *optional*):
+            Additional initConnection parameters.
+            For now, only the tz_offset field is supported, for specifying timezone offset in seconds.
+
         config_filename (``str``, *optional*):
             Set config filename and client will use config for some parameters instead of entering them directly
             Config file will open as .json file, e.g.: *{"name": "Peluserbot", "app_version": "1.32.3-beta"}*
@@ -153,10 +189,21 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
     APP_VERSION = Client.APP_VERSION
     DEVICE_MODEL = Client.DEVICE_MODEL
     SYSTEM_VERSION = Client.SYSTEM_VERSION
+
     LANG_CODE = Client.LANG_CODE
+    LANG_PACK = Client.LANG_PACK
+    SYSTEM_LANG_CODE = Client.SYSTEM_LANG_CODE
+
+    PARENT_DIR = Client.PARENT_DIR
+
+    INVITE_LINK_RE = re.compile(r"^(?:https?://)?(?:www\.)?(?:t(?:elegram)?\.(?:org|me|dog)/(?:joinchat/|\+))([\w-]+)$")
     WORKERS = Client.WORKERS
     WORKDIR = Client.WORKDIR
+
+    # Interval of seconds in which the updates watchdog will kick in
+    UPDATES_WATCHDOG_INTERVAL = 15 * 60
     MAX_CONCURRENT_TRANSMISSIONS = 1
+    MAX_MESSAGE_CACHE_SIZE = 10000
 
     MODULE_CONFIGS_DIRECTORY = 'module_configs'
     RESOURCES_DIRECTORY = 'resources'
@@ -177,34 +224,44 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
     }
     DEFAULT_CONFIG_FILENAME = 'config.json'
 
+    mimetypes = Client.mimetypes
+    mimetypes.readfp(StringIO(mime_types))
+
     def __init__(
-            self,
-            name: str = NAME,
-            api_id: Union[int, str] = None,
-            api_hash: str = None,
-            app_version: str = APP_VERSION,
-            device_model: str = DEVICE_MODEL,
-            system_version: str = SYSTEM_VERSION,
-            lang_code: str = LANG_CODE,
-            ipv6: bool = False,
-            proxy: dict = None,
-            test_mode: bool = False,
-            bot_token: str = None,
-            session_string: str = None,
-            in_memory: bool = None,
-            phone_number: str = None,
-            phone_code: str = None,
-            password: str = None,
-            workers: int = WORKERS,
-            workdir: str = WORKDIR,
-            plugins: dict = None,
-            parse_mode: "enums.ParseMode" = enums.ParseMode.DEFAULT,
-            no_updates: bool = None,
-            takeout: bool = None,
-            sleep_threshold: int = Session.SLEEP_THRESHOLD,
-            hide_password: bool = False,
-            max_concurrent_transmissions: int = MAX_CONCURRENT_TRANSMISSIONS,
-            config_filename: str = None
+        self,
+        name: str = NAME,
+        api_id: Optional[Union[int, str]] = None,
+        api_hash: Optional[str] = None,
+        app_version: str = APP_VERSION,
+        device_model: str = DEVICE_MODEL,
+        system_version: str = SYSTEM_VERSION,
+        lang_pack: str = LANG_PACK,
+        lang_code: str = LANG_CODE,
+        system_lang_code: str = SYSTEM_LANG_CODE,
+        ipv6: Optional[bool] = False,
+        proxy: Optional[dict] = None,
+        test_mode: Optional[bool] = False,
+        bot_token: Optional[str] = None,
+        session_string: Optional[str] = None,
+        in_memory: Optional[bool] = None,
+        phone_number: Optional[str] = None,
+        phone_code: Optional[str] = None,
+        password: Optional[str] = None,
+        workers: int = WORKERS,
+        workdir: Union[str, Path] = WORKDIR,
+        plugins: Optional[dict] = None,
+        parse_mode: "enums.ParseMode" = enums.ParseMode.DEFAULT,
+        no_updates: Optional[bool] = None,
+        skip_updates: Optional[bool] = True,
+        takeout: Optional[bool] = None,
+        sleep_threshold: int = Session.SLEEP_THRESHOLD,
+        hide_password: Optional[bool] = False,
+        max_concurrent_transmissions: int = MAX_CONCURRENT_TRANSMISSIONS,
+        max_message_cache_size: int = MAX_MESSAGE_CACHE_SIZE,
+        storage_engine: Optional[Storage] = None,
+        client_platform: "enums.ClientPlatform" = enums.ClientPlatform.OTHER,
+        init_connection_params: Optional["raw.base.JSONValue"] = None,
+        config_filename: str = None
     ):
         if config_filename is not None:
             config_data = json.loads(open(config_filename, encoding='utf8').read().encode().decode('utf-8-sig'))
@@ -279,7 +336,9 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
         self.app_version = app_version
         self.device_model = device_model
         self.system_version = system_version
+        self.lang_pack = lang_pack.lower()
         self.lang_code = lang_code.lower()
+        self.system_lang_code = system_lang_code.lower()
         self.ipv6 = ipv6
         self.proxy = proxy
         self.test_mode = test_mode
@@ -294,10 +353,14 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
         self.plugins = plugins
         self.parse_mode = parse_mode
         self.no_updates = no_updates
+        self.skip_updates = skip_updates
         self.takeout = takeout
         self.sleep_threshold = sleep_threshold
         self.hide_password = hide_password
         self.max_concurrent_transmissions = max_concurrent_transmissions
+        self.max_message_cache_size = max_message_cache_size
+        self.client_platform = client_platform
+        self.init_connection_params = init_connection_params
 
         self.executor = ThreadPoolExecutor(self.workers, thread_name_prefix="Handler")
 
@@ -305,6 +368,8 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
             self.storage = MemoryStorage(self.name, self.session_string)
         elif self.in_memory:
             self.storage = MemoryStorage(self.name)
+        elif isinstance(storage_engine, Storage):
+            self.storage = storage_engine
         else:
             self.storage = FileStorage(self.name, self.workdir)
 
@@ -314,7 +379,12 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
 
         self.parser = Parser(self)
 
-        self.session = None
+        self.session: Optional[Session] = None
+
+        self.business_connections = {}
+
+        self.sessions = {}
+        self.sessions_lock = asyncio.Lock()
 
         self.media_sessions = {}
         self.media_sessions_lock = asyncio.Lock()
@@ -458,66 +528,95 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
     def get_core_string_form(self, string_id, value, default=None, lang_code=None, **format_kwargs):
         return self.get_string_form(string_id, value, default, lang_code, _module_id='core.handlers', **format_kwargs)
 
-    old_send_message = Client.send_message
+    _send_message = Client.send_message
 
     async def send_message(
-            self: "Peluserbot",
-            chat_id: Union[int, str],
-            text: str,
-            parse_mode: Optional["enums.ParseMode"] = None,
-            entities: List["types.MessageEntity"] = None,
-            disable_web_page_preview: bool = None,
-            disable_notification: bool = None,
-            reply_to_message_id: int = None,
-            schedule_date: datetime = None,
-            protect_content: bool = None,
-            reply_markup: Union[
-                "types.InlineKeyboardMarkup",
-                "types.ReplyKeyboardMarkup",
-                "types.ReplyKeyboardRemove",
-                "types.ForceReply"
-            ] = None
-
+        self: "Peluserbot",
+        chat_id: Union[int, str],
+        text: str,
+        parse_mode: Optional["enums.ParseMode"] = None,
+        entities: List["types.MessageEntity"] = None,
+        disable_web_page_preview: bool = None,
+        disable_notification: bool = None,
+        message_thread_id: int = None,
+        effect_id: int = None,
+        show_above_text: bool = None,
+        reply_to_message_id: int = None,
+        reply_to_chat_id: Union[int, str] = None,
+        reply_to_story_id: int = None,
+        quote_text: str = None,
+        quote_entities: List["types.MessageEntity"] = None,
+        quote_offset: int = None,
+        schedule_date: datetime = None,
+        protect_content: bool = None,
+        business_connection_id: str = None,
+        reply_markup: Union[
+            "types.InlineKeyboardMarkup",
+            "types.ReplyKeyboardMarkup",
+            "types.ReplyKeyboardRemove",
+            "types.ForceReply"
+        ] = None,
+        without_prefix: bool = False
     ) -> "types.Message":
         message_prefix = self.get_config_parameter('message_prefix', str())
-        if message_prefix:
-            text = message_prefix + text
-        return await self.old_send_message(
+        if not without_prefix:
+            if message_prefix:
+                text = message_prefix + text
+        if without_prefix and text.startswith(message_prefix):
+            text = text[len(message_prefix):]
+        return await self._send_message(
             chat_id=chat_id,
             text=text,
             parse_mode=parse_mode,
             entities=entities,
             disable_web_page_preview=disable_web_page_preview,
             disable_notification=disable_notification,
+            message_thread_id=message_thread_id,
+            effect_id=effect_id,
+            show_above_text=show_above_text,
             reply_to_message_id=reply_to_message_id,
+            reply_to_chat_id=reply_to_chat_id,
+            reply_to_story_id=reply_to_story_id,
+            quote_text=quote_text,
+            quote_entities=quote_entities,
+            quote_offset=quote_offset,
             schedule_date=schedule_date,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             reply_markup=reply_markup
         )
 
-    old_edit_message_text = Client.edit_message_text
+    _edit_message_text = Client.edit_message_text
 
     async def edit_message_text(
-            self: "Peluserbot",
-            chat_id: Union[int, str],
-            message_id: int,
-            text: str,
-            parse_mode: Optional["enums.ParseMode"] = None,
-            entities: List["types.MessageEntity"] = None,
-            disable_web_page_preview: bool = None,
-            reply_markup: "types.InlineKeyboardMarkup" = None
+        self: "Peluserbot",
+        chat_id: Union[int, str],
+        message_id: int,
+        text: str,
+        parse_mode: Optional["enums.ParseMode"] = None,
+        entities: List["types.MessageEntity"] = None,
+        disable_web_page_preview: bool = None,
+        show_above_text: bool = None,
+        schedule_date: datetime = None,
+        reply_markup: "types.InlineKeyboardMarkup" = None,
+        without_prefix: bool = False
     ) -> "types.Message":
         message_prefix = self.get_config_parameter('message_prefix', str())
-        if message_prefix and not text.startswith(message_prefix):
-            text = message_prefix + text
+        if not without_prefix:
+            if message_prefix:
+                text = message_prefix + text
+        if without_prefix and text.startswith(message_prefix):
+            text = text[len(message_prefix):]
 
-        return await self.old_edit_message_text(
+        return await self._edit_message_text(
             chat_id=chat_id,
             message_id=message_id,
             text=text,
             parse_mode=parse_mode,
             entities=entities,
             disable_web_page_preview=disable_web_page_preview,
+            show_above_text=show_above_text,
+            schedule_date=schedule_date,
             reply_markup=reply_markup
         )
 

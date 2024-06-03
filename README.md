@@ -1,15 +1,15 @@
-# PelUserbot-2.0
-PelUserbot, a powerful userbot for Telegram, containing a lot of features.
+# Peluserbot-2.0
+PelUserbot, a powerful userbot for Telegram, containing a lot of features. Currently, in development
 
-__Some of PelUserbot's features__:
+__Some of Peluserbot's features__:
 
-* __Modules__: PelUserbot can in runtime turn off and on its handlers and modules, so it can expand its functional
+* __Modules__: Peluserbot can in runtime turn off and on its handlers and modules, so it can expand its functional
 
-* __Scheduler__: PelUserbot has built-in asynchronous scheduler
+* __Scheduler__: Peluserbot has built-in asynchronous scheduler
 
-* __Databases__: PelUserbot offers built-in databases for modules and PelUserbot itself
+* __Databases__: Peluserbot offers built-in databases for modules and PelUserbot itself
 
-* __Finite State Machine__: PelUserbot has its own finite state machine for every module
+* __Finite State Machine__: Peluserbot has its own finite state machine for every module
 
 Know more about it in [project's wiki](https://github.com/pelmesh619/PelUserbot-2.0/wiki)!
 
