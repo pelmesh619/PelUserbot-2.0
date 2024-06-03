@@ -1,5 +1,5 @@
 # Peluserbot-2.0
-PelUserbot, a powerful userbot for Telegram, containing a lot of features. Currently, in development
+Peluserbot, a powerful userbot for Telegram, containing a lot of features. Currently, in development
 
 __Some of Peluserbot's features__:
 
