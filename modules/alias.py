@@ -247,7 +247,7 @@ def alias_work_filter(_, __, message):
             return True
 
 
-@Client.on_message(filters.me & (filters.text | filters.caption) &
+@Client.on_message(filters.me & filters.text &
                    filters.create(alias_work_filter, __doc__=alias_work_filter.__doc__))
 async def alias_handler_worker(app, message):
     await message.edit(message.text)

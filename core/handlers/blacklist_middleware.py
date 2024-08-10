@@ -12,7 +12,6 @@ async def blacklist_filter_function(_, app, message):
         if user.id in blacklist_users:
             return True
 
-
     blacklist_sender_chats = app.get_config_parameter('blacklist_sender_chats')
     if message.sender_chat:
         user = message.sender_chat
@@ -39,5 +38,5 @@ blacklist_filter = filters.create(blacklist_filter_function)
 
 
 @Client.on_message(blacklist_filter, group=-2)
-async def blacklist_middleware(_, msg):
+async def blacklist_middleware(_, __):
     raise pyrogram.StopPropagation

@@ -1,13 +1,12 @@
-import asyncio
-import html
-import inspect
-import json
-import logging
 import re
 import sys
+import html
 import time
-from datetime import datetime
+import asyncio
+import inspect
+import logging
 from enum import Enum
+from datetime import datetime
 
 import pyrogram
 from pyrogram.handlers.handler import Handler
@@ -80,6 +79,8 @@ def filter_update(data):
 
 
 class Peldispatcher(Dispatcher):
+    client: "core.bot_types.peluser.PelUserBot"
+
     def __init__(self, client: "core.bot_types.peluserbot.Peluserbot"):
         super().__init__(client)
 

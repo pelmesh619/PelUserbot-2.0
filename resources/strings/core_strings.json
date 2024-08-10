@@ -241,8 +241,14 @@
         "blacklist_user_was_added": "❌Пользователь {mention} был добавлен в черный список бота, бот больше не будет реагировать на его запросы.\n\nЧтобы убрать пользователя из черного списка, ответьте на любое его сообщение командой <code>{_cmd_pref}blacklist</code>",
         "blacklist_chat_was_removed": "✅Чат {mention} был убран из черного списка бота, теперь бот будет реагировать на запросы в этом чате.\n\nЧтобы добавить чат в черный список, отправьте в этом чате команду <code>{_cmd_pref}blacklist</code>",
         "blacklist_chat_was_added": "❌Чат {mention} был добавлен в черный список бота, бот больше не будет реагировать на запросы в этом чате.\n\nЧтобы убрать чат из черного списка, отправьте в этом чате команду <code>{_cmd_pref}blacklist</code>",
-        "blacklist_sender_chat_was_removed": "",
-        "blacklist_sender_chat_was_added": "",
+        "blacklist_sender_chat_was_removed": "✅Чат отправителя {mention} был убран из черного списка бота, теперь бот будет реагировать на запросы в этом чате.\n\nЧтобы добавить чат в черный список, отправьте в этом чате команду <code>{_cmd_pref}blacklist</code>",
+        "blacklist_sender_chat_was_added": "❌Чат отправителя {mention} был добавлен в черный список бота, бот больше не будет реагировать на запросы в этом чате.\n\nЧтобы убрать чат из черного списка, отправьте в этом чате команду <code>{_cmd_pref}blacklist</code>",
+        "blacklist_user_is_in_blacklist": "✅Пользователь {mention} <b>не находится</b> в черном списке бота.\n\nЧтобы добавить пользователя в черный список, ответьте на любое его сообщение командой <code>{_cmd_pref}blacklist</code>",
+        "blacklist_user_is_not_in_blacklist": "❌Пользователь {mention} <b>находится</b> в черном списке бота.\n\nЧтобы убрать пользователя из черного списка, ответьте на любое его сообщение командой <code>{_cmd_pref}blacklist</code>",
+        "blacklist_chat_is_in_blacklist": "✅Чат {mention} <b>не находится</b> в черном списке бота.\n\nЧтобы добавить чат в черный список, отправьте в этом чате команду <code>{_cmd_pref}blacklist</code>",
+        "blacklist_chat_is_not_in_blacklist": "❌Чат {mention} <b>находится</b> в черном списке бота.\n\nЧтобы убрать чат из черного списка, отправьте в этом чате команду <code>{_cmd_pref}blacklist</code>",
+        "blacklist_sender_chat_is_in_blacklist": "✅Чат отправителя {mention} <b>не находится</b> в черном списке бота.\n\nЧтобы добавить чат в черный список, отправьте в этом чате команду <code>{_cmd_pref}blacklist</code>",
+        "blacklist_sender_chat_is_not_in_blacklist": "❌Чат отправителя {mention} <b>находится</b> в черном списке бота.\n\nЧтобы убрать чат из черного списка, отправьте в этом чате команду <code>{_cmd_pref}blacklist</code>",
 
         "wait_answer_filter_description": "Фильтрует сообщения, который являются ответом на сообщение, которое ждет ответа",
 

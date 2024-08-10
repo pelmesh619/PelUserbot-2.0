@@ -558,6 +558,117 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
         ] = None,
         without_prefix: bool = False
     ) -> "types.Message":
+        """Send text messages with insertion of bot message prefix
+
+        .. include:: /_includes/usable-by/users-bots.rst
+
+        Parameters:
+            chat_id (``int`` | ``str``):
+                Unique identifier (int) or username (str) of the target chat.
+                For your personal cloud (Saved Messages) you can simply use "me" or "self".
+                For a contact that exists in your Telegram address book you can use his phone number (str).
+
+            text (``str``):
+                Text of the message to be sent.
+
+            parse_mode (:obj:`~pyrogram.enums.ParseMode`, *optional*):
+                By default, texts are parsed using both Markdown and HTML styles.
+                You can combine both syntaxes together.
+
+            entities (List of :obj:`~pyrogram.types.MessageEntity`):
+                List of special entities that appear in message text, which can be specified instead of *parse_mode*.
+
+            disable_web_page_preview (``bool``, *optional*):
+                Disables link previews for links in this message.
+
+            disable_notification (``bool``, *optional*):
+                Sends the message silently.
+                Users will receive a notification with no sound.
+
+            message_thread_id (``int``, *optional*):
+                Unique identifier for the target message thread (topic) of the forum.
+                For supergroups only.
+
+            effect_id (``int``, *optional*):
+                Unique identifier of the message effect.
+                For private chats only.
+
+            show_above_text (``bool``, *optional*):
+                If True, link preview will be shown above the message text.
+                Otherwise, the link preview will be shown below the message text.
+
+            reply_to_message_id (``int``, *optional*):
+                If the message is a reply, ID of the original message.
+
+            reply_to_chat_id (``int``, *optional*):
+                If the message is a reply, ID of the original chat.
+
+            reply_to_story_id (``int``, *optional*):
+                Unique identifier for the target story.
+
+            quote_text (``str``, *optional*):
+                Text of the quote to be sent.
+
+            quote_entities (List of :obj:`~pyrogram.types.MessageEntity`, *optional*):
+                List of special entities that appear in quote text, which can be specified instead of *parse_mode*.
+
+            quote_offset (``int``, *optional*):
+                Offset for quote in original message.
+
+            schedule_date (:py:obj:`~datetime.datetime`, *optional*):
+                Date when the message will be automatically sent.
+
+            protect_content (``bool``, *optional*):
+                Protects the contents of the sent message from forwarding and saving.
+
+            business_connection_id (``str``, *optional*):
+                Unique identifier of the business connection on behalf of which the message will be sent.
+
+            reply_markup (:obj:`~pyrogram.types.InlineKeyboardMarkup` | :obj:`~pyrogram.types.ReplyKeyboardMarkup` | :obj:`~pyrogram.types.ReplyKeyboardRemove` | :obj:`~pyrogram.types.ForceReply`, *optional*):
+                Additional interface options. An object for an inline keyboard, custom reply keyboard,
+                instructions to remove reply keyboard or to force a reply from the user.
+
+            without_prefix (``bool``, *optional*):
+                If True, message prefix will not be inserted
+
+        Returns:
+            :obj:`~pyrogram.types.Message`: On success, the sent text message is returned.
+
+        Example:
+            .. code-block:: python
+
+                # Simple example
+                await app.send_message("me", "Message sent with **Pyrogram**!")
+
+                # Disable web page previews
+                await app.send_message("me", "https://docs.pyrogram.org",
+                    disable_web_page_preview=True)
+
+                # Reply to a message using its id
+                await app.send_message("me", "this is a reply", reply_to_message_id=123)
+
+            .. code-block:: python
+
+                # For bots only, send messages with keyboards attached
+
+                from pyrogram.types import (
+                    ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton)
+
+                # Send a normal keyboard
+                await app.send_message(
+                    chat_id, "Look at that button!",
+                    reply_markup=ReplyKeyboardMarkup([["Nice!"]]))
+
+                # Send an inline keyboard
+                await app.send_message(
+                    chat_id, "These are inline buttons",
+                    reply_markup=InlineKeyboardMarkup(
+                        [
+                            [InlineKeyboardButton("Data", callback_data="callback_data")],
+                            [InlineKeyboardButton("Docs", url="https://docs.pyrogram.org")]
+                        ]))
+        """
+
         message_prefix = self.get_config_parameter('message_prefix', str())
         if not without_prefix:
             if message_prefix:
@@ -601,6 +712,58 @@ class Peluserbot(Client, ConfigManager, ModuleManager):
         reply_markup: "types.InlineKeyboardMarkup" = None,
         without_prefix: bool = False
     ) -> "types.Message":
+        """Edit the text of messages with insertion of bot message prefix
+
+        Parameters:
+            chat_id (``int`` | ``str``):
+                Unique identifier (int) or username (str) of the target chat.
+                For your personal cloud (Saved Messages) you can simply use "me" or "self".
+                For a contact that exists in your Telegram address book you can use his phone number (str).
+
+            message_id (``int``):
+                Message identifier in the chat specified in chat_id.
+
+            text (``str``):
+                New text of the message.
+
+            parse_mode (:obj:`~pyrogram.enums.ParseMode`, *optional*):
+                By default, texts are parsed using both Markdown and HTML styles.
+                You can combine both syntaxes together.
+
+            entities (List of :obj:`~pyrogram.types.MessageEntity`):
+                List of special entities that appear in message text, which can be specified instead of *parse_mode*.
+
+            disable_web_page_preview (``bool``, *optional*):
+                Disables link previews for links in this message.
+
+            show_above_text (``bool``, *optional*):
+                If True, link preview will be shown above the message text.
+                Otherwise, the link preview will be shown below the message text.
+
+            schedule_date (:py:obj:`~datetime.datetime`, *optional*):
+                Date when the message will be automatically sent.
+
+            reply_markup (:obj:`~pyrogram.types.InlineKeyboardMarkup`, *optional*):
+                An InlineKeyboardMarkup object.
+
+            without_prefix (``bool``, *optional*):
+                If True, message prefix will not be inserted
+
+        Returns:
+            :obj:`~pyrogram.types.Message`: On success, the edited message is returned.
+
+        Example:
+            .. code-block:: python
+
+                # Simple edit text
+                await app.edit_message_text(chat_id, message_id, "new text")
+
+                # Take the same text message, remove the web page preview only
+                await app.edit_message_text(
+                    chat_id, message_id, message.text,
+                    disable_web_page_preview=True)
+        """
+
         message_prefix = self.get_config_parameter('message_prefix', str())
         if not without_prefix:
             if message_prefix:
