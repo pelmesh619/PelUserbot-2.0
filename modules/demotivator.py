@@ -28,7 +28,7 @@ module = Module(
     changelog={},
     config={
         'photo_size': [1536, 1536],
-        'default_caption': 'ГДЕ ПОДПИСЬ, БЛЯДЬ!!!',
+        'default_caption': 'ГДЕ ПОДПИСЬ!!!',
 
     }
 

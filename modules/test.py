@@ -57,12 +57,12 @@ module = Module(
 
 
 @Client.on_message(filters.command('test'))
-async def test_handler(_, msg):
+async def test_handler(app, msg):
     """string_id=docs_test_handler
     Replies message on command `/test`. If message was not sent there is something wrong with bot.
     Does not take any arguments.
     """
-    await msg.reply(module.get_string('bot_works'))
+    await app.send_message(msg.chat.id, module.get_string('bot_works'), reply_to_message_id=msg.id, without_prefix=True)
 
 
 @Client.on_message(filters.command('test', ['!']) & filters.me)
