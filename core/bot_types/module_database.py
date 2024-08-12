@@ -30,10 +30,10 @@ class ModuleDatabase(BotObject):
 
         self.execute(self.schema)
 
-    def execute(self, sql):
+    def execute(self, sql, *args):
         cur = self.connection.cursor()
         try:
-            cur.executescript(sql)
+            cur.execute(sql, args)
             self.connection.commit()
         except Exception as e:
             print(repr(e))
@@ -44,10 +44,10 @@ class ModuleDatabase(BotObject):
         cur.close()
         return True
 
-    def execute_and_fetch(self, sql):
+    def execute_and_fetch(self, sql, *args):
         cur = self.connection.cursor()
         try:
-            cur.execute(sql)
+            cur.execute(sql, args)
         except Exception as e:
             print(repr(e))
             logging.error(f'Error while executing `{sql}` in database of module `{self.module_id}`', exc_info=e)

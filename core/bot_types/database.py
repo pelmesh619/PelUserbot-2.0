@@ -37,12 +37,12 @@ class PostgreSQLDatabase(Database):
         else:
             self.conn.autocommit = True
 
-    def exec(self, command, to_log=True):
+    def exec(self, command, *args, to_log=True):
         if not self.conn:
             return []
         cursor = self.conn.cursor()
 
-        cursor.execute(command)
+        cursor.execute(command, *args)
 
         if to_log:
             # TODO logs
@@ -50,12 +50,12 @@ class PostgreSQLDatabase(Database):
 
         return True
 
-    def exec_and_fetch(self, command, to_log=True):
+    def exec_and_fetch(self, command, *args, to_log=True):
         if not self.conn:
             return []
         cursor = self.conn.cursor()
 
-        cursor.execute(command)
+        cursor.execute(command, *args)
 
         if to_log:
             # TODO logs
@@ -77,7 +77,7 @@ class PostgreSQLDatabase(Database):
 class AsyncPostgreSQLDatabase(Database):
     def __init__(self, app, config):
         super().__init__(app, config)
-        self.conn = None
+        self.conn: asyncpg.connection.Connection = None
 
     async def connect(self):
         self.conn = await asyncpg.connect(
@@ -88,24 +88,24 @@ class AsyncPostgreSQLDatabase(Database):
             port=self.config['port']
         )
 
-    async def exec(self, command, to_log=True):
+    async def exec(self, command, *args, to_log=True):
         if self.conn is None:
             await self.connect()
         async with self.conn.transaction():
 
-            await self.conn.execute(command)
+            await self.conn.execute(command, *args)
             if to_log:
                 # TODO logs
                 pass
 
             return True
 
-    async def exec_and_fetch(self, command, to_log=True):
+    async def exec_and_fetch(self, command, *args, to_log=True):
         if self.conn is None:
             await self.connect()
         async with self.conn.transaction():
 
-            result = await self.conn.fetch(command)
+            result = await self.conn.fetch(command, *args)
             if to_log:
                 # TODO logs
                 pass
